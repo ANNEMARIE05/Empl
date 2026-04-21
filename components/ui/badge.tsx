@@ -2,15 +2,15 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const pastille = cva(
-  "inline-flex items-center rounded-[var(--rayon-sm)] border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+  "inline-flex items-center rounded-lg border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider",
   {
     variants: {
       ton: {
-        neutre: "border-[var(--bordure)] bg-[var(--surface-mute)] text-[var(--texte-secondaire)]",
-        accent: "border-transparent bg-[var(--accent-principal)]/15 text-[var(--texte-principal)]",
-        succes: "border-transparent bg-emerald-500/15 text-emerald-800 dark:text-emerald-200",
-        alerte: "border-transparent bg-amber-500/15 text-amber-900 dark:text-amber-100",
-        danger: "border-transparent bg-[var(--danger)]/15 text-red-800 dark:text-red-200",
+        neutre: "border-[var(--bordure)]/50 bg-[var(--surface-mute)]/80 text-[var(--texte-secondaire)]",
+        accent: "border-[var(--accent-principal)]/20 bg-[var(--accent-principal)]/15 text-[var(--accent-principal)]",
+        succes: "border-emerald-500/20 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+        alerte: "border-amber-500/20 bg-amber-500/15 text-amber-700 dark:text-amber-300",
+        danger: "border-[var(--danger)]/20 bg-[var(--danger)]/15 text-[var(--danger)]",
       },
     },
     defaultVariants: { ton: "neutre" },

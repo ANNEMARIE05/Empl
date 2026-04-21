@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 const Tableau = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-x-auto rounded-[var(--rayon-md)] border border-[var(--bordure)]">
+    <div className="relative w-full overflow-x-auto rounded-xl border border-[var(--bordure)]/50 bg-[var(--surface-elevee)]">
       <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
     </div>
   ),
@@ -14,7 +14,7 @@ const TableauEntete = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("bg-[var(--surface-mute)]/60", className)} {...props} />
+  <thead ref={ref} className={cn("border-b border-[var(--bordure)]/50 bg-[var(--surface-mute)]/40", className)} {...props} />
 ));
 TableauEntete.displayName = "TableauEntete";
 
@@ -33,7 +33,7 @@ const TableauRangee = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b border-[var(--bordure)]/70 transition-colors hover:bg-[var(--surface-mute)]/40",
+      "border-b border-[var(--bordure)]/30 transition-colors hover:bg-[var(--surface-mute)]/30",
       className,
     )}
     {...props}
@@ -48,7 +48,7 @@ const TableauCelluleEntete = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-10 px-3 text-left align-middle text-[10px] font-semibold uppercase tracking-wider text-[var(--texte-secondaire)]",
+      "h-11 px-4 text-left align-middle text-xs font-semibold uppercase tracking-wider text-[var(--texte-secondaire)]",
       className,
     )}
     {...props}
@@ -60,7 +60,7 @@ const TableauCellule = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <td ref={ref} className={cn("p-3 align-middle text-[var(--texte-principal)]", className)} {...props} />
+  <td ref={ref} className={cn("px-4 py-3 align-middle text-[var(--texte-principal)]", className)} {...props} />
 ));
 TableauCellule.displayName = "TableauCellule";
 

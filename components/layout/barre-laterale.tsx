@@ -95,32 +95,37 @@ export function BarreLaterale({
     <aside
       style={{ width: largeur }}
       className={cn(
-        "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-[var(--bordure)]/80 bg-[var(--barre-laterale)] text-[var(--barre-laterale-texte)] backdrop-blur-xl transition-[width] duration-300",
+        "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-white/5 bg-gradient-to-b from-[var(--barre-laterale)] to-[#0a0a0a] text-[var(--barre-laterale-texte)] transition-[width] duration-300",
       )}
     >
-      <div className="flex h-16 items-center gap-2 border-b border-white/10 px-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-[var(--rayon-sm)] bg-[var(--barre-laterale-accent)] text-[var(--texte-sur-accent)] text-sm font-black">
+      <div className="flex h-16 items-center gap-3 border-b border-white/5 px-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--barre-laterale-accent)] to-[var(--barre-laterale-accent)]/80 text-sm font-black text-[var(--texte-sur-accent)] shadow-lg shadow-[var(--barre-laterale-accent)]/20">
           M
         </div>
         {menuOuvert && (
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold tracking-tight">MUFER</p>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--barre-laterale-accent)]">
-              Employés
+            <p className="truncate text-base font-bold tracking-tight">MUFER</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--barre-laterale-accent)]">
+              Gestion RH
             </p>
           </div>
         )}
         <button
           type="button"
           onClick={() => basculerMenu()}
-          className="ml-auto hidden rounded-[var(--rayon-sm)] border border-white/10 p-1.5 text-[var(--barre-laterale-texte)] hover:bg-white/5 lg:inline-flex"
-          aria-label={menuOuvert ? "Replier le menu" : "Déplier le menu"}
+          className="ml-auto hidden rounded-lg border border-white/10 bg-white/5 p-1.5 text-[var(--barre-laterale-texte)] transition-colors hover:bg-white/10 lg:inline-flex"
+          aria-label={menuOuvert ? "Replier le menu" : "Deplier le menu"}
         >
           {menuOuvert ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
         </button>
       </div>
 
-      <nav className="flex-1 space-y-6 overflow-y-auto px-2 py-4">
+      <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-4">
+        {menuOuvert && (
+          <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-white/40">
+            Menu principal
+          </p>
+        )}
         <div className="space-y-1">
           {menu.map((el) => {
             const actif = ongletActif === el.id;
@@ -130,26 +135,29 @@ export function BarreLaterale({
                 type="button"
                 onClick={() => aller(el.id)}
                 className={cn(
-                  "group relative flex w-full items-center gap-3 rounded-[var(--rayon-md)] px-2.5 py-2 text-left text-sm font-medium transition-colors",
+                  "group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all",
                   actif
-                    ? "bg-white/10 text-[var(--barre-laterale-accent)]"
-                    : "text-white/65 hover:bg-white/5 hover:text-white",
+                    ? "bg-gradient-to-r from-[var(--barre-laterale-accent)]/20 to-transparent text-[var(--barre-laterale-accent)]"
+                    : "text-white/60 hover:bg-white/5 hover:text-white/90",
                 )}
               >
                 {actif && (
                   <motion.span
                     layoutId="indicateur-menu"
-                    className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-[var(--barre-laterale-accent)]"
+                    className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[var(--barre-laterale-accent)]"
                   />
                 )}
-                <span className="relative z-10 flex size-8 items-center justify-center rounded-[var(--rayon-sm)] border border-white/10 bg-black/20">
+                <span className={cn(
+                  "relative z-10 flex size-8 items-center justify-center rounded-lg transition-colors",
+                  actif ? "bg-[var(--barre-laterale-accent)]/20" : "bg-white/5 group-hover:bg-white/10"
+                )}>
                   {icones[el.id]}
                 </span>
                 {menuOuvert && (
                   <span className="relative z-10 flex min-w-0 flex-1 items-center justify-between gap-2">
                     <span className="truncate">{el.libelle}</span>
                     {el.id === "notifications" && nonLues > 0 && (
-                      <span className="rounded-[var(--rayon-sm)] bg-[var(--danger)] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      <span className="rounded-full bg-[var(--danger)] px-2 py-0.5 text-[10px] font-bold text-white">
                         {nonLues > 9 ? "9+" : nonLues}
                       </span>
                     )}
@@ -159,7 +167,12 @@ export function BarreLaterale({
             );
           })}
         </div>
-        <div className="space-y-1 border-t border-white/10 pt-4">
+        {menuOuvert && (
+          <p className="mb-2 mt-4 px-2 text-[10px] font-semibold uppercase tracking-widest text-white/40">
+            Configuration
+          </p>
+        )}
+        <div className="space-y-1">
           {secondaire.map((el) => {
             const actif = ongletActif === el.id;
             return (
@@ -168,11 +181,16 @@ export function BarreLaterale({
                 type="button"
                 onClick={() => aller(el.id)}
                 className={cn(
-                  "relative flex w-full items-center gap-3 rounded-[var(--rayon-md)] px-2.5 py-2 text-left text-sm font-medium transition-colors",
-                  actif ? "bg-white/10 text-[var(--barre-laterale-accent)]" : "text-white/55 hover:bg-white/5",
+                  "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all",
+                  actif
+                    ? "bg-gradient-to-r from-[var(--barre-laterale-accent)]/20 to-transparent text-[var(--barre-laterale-accent)]"
+                    : "text-white/50 hover:bg-white/5 hover:text-white/80",
                 )}
               >
-                <span className="flex size-8 items-center justify-center rounded-[var(--rayon-sm)] border border-white/10 bg-black/20">
+                <span className={cn(
+                  "flex size-8 items-center justify-center rounded-lg transition-colors",
+                  actif ? "bg-[var(--barre-laterale-accent)]/20" : "bg-white/5"
+                )}>
                   {icones[el.id]}
                 </span>
                 {menuOuvert && <span className="truncate">{el.libelle}</span>}
@@ -182,23 +200,23 @@ export function BarreLaterale({
         </div>
       </nav>
 
-      <div className="border-t border-white/10 p-3">
-        <div className={cn("flex items-center gap-3", !menuOuvert && "flex-col")}>
-          <Avatar className="size-10 border border-white/15">
+      <div className="border-t border-white/5 p-3">
+        <div className={cn("flex items-center gap-3 rounded-xl bg-white/5 p-2", !menuOuvert && "flex-col bg-transparent p-0")}>
+          <Avatar className="size-10 ring-2 ring-white/10">
             {utilisateur.photoUrl ? (
               <AvatarImage src={utilisateur.photoUrl} alt="" />
             ) : null}
-            <AvatarFallback>
+            <AvatarFallback className="bg-[var(--barre-laterale-accent)]/20 text-[var(--barre-laterale-accent)]">
               {utilisateur.prenom[0]}
               {utilisateur.nom[0]}
             </AvatarFallback>
           </Avatar>
           {menuOuvert && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">
+              <p className="truncate text-sm font-semibold">
                 {utilisateur.prenom} {utilisateur.nom}
               </p>
-              <div className="mt-1 flex flex-wrap gap-1">
+              <div className="mt-0.5 flex items-center gap-2">
                 <Pastille
                   ton={
                     utilisateur.role === "rh"
@@ -207,21 +225,21 @@ export function BarreLaterale({
                         ? "alerte"
                         : "neutre"
                   }
+                  className="text-[9px]"
                 >
                   {libelleRole(utilisateur.role)}
                 </Pastille>
-                <span className="text-[10px] text-white/50">{utilisateur.poste}</span>
               </div>
             </div>
           )}
         </div>
         <Bouton
           variante="secondaire"
-          className="mt-3 w-full border-white/15 bg-white/5 text-white hover:bg-white/10"
+          className="mt-3 w-full border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"
           onClick={() => setConfirmerSortie(true)}
         >
           <LogOut className="size-4" />
-          {menuOuvert && "Déconnexion"}
+          {menuOuvert && "Deconnexion"}
         </Bouton>
       </div>
     </aside>

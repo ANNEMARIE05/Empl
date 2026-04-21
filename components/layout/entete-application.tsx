@@ -74,13 +74,15 @@ export function EnteteApplication({
 
   if (!utilisateur) return null;
 
+  const roleLibelle = utilisateur.role === "rh" ? "RH" : utilisateur.role === "manager" ? "Manager" : "Employe";
+
   return (
     <motion.header
       layout
-      className="fixed top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--bordure)]/80 bg-[var(--surface-elevee)]/85 px-3 backdrop-blur-xl sm:px-5"
+      className="fixed top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--bordure)]/50 bg-[var(--surface-elevee)]/90 px-4 shadow-sm backdrop-blur-xl sm:px-6"
       style={{ left: margeGauche, right: 0 }}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
         <Bouton
           variante="fantome"
           taille="icone"
@@ -95,36 +97,39 @@ export function EnteteApplication({
             key={ongletActif}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="truncate text-base font-semibold tracking-tight sm:text-lg"
+            className="truncate text-lg font-bold tracking-tight"
           >
             {entete.titre}
           </motion.h1>
-          {entete.sousTitre ? (
-            <p className="hidden text-[11px] text-[var(--texte-secondaire)] sm:block sm:text-xs">
+          {entete.sousTitre && (
+            <p className="hidden text-xs text-[var(--texte-secondaire)] sm:block">
               {entete.sousTitre}
             </p>
-          ) : null}
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="puce-donnee hidden lg:inline-flex">
-          {format(new Date(), "EEEE d MMMM yyyy", { locale: fr })}
-        </span>
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="hidden items-center gap-2 rounded-lg border border-[var(--bordure)]/50 bg-[var(--surface-mute)]/40 px-3 py-1.5 lg:flex">
+          <span className="text-xs font-medium text-[var(--texte-secondaire)]">
+            {format(new Date(), "EEEE d MMMM", { locale: fr })}
+          </span>
+        </div>
 
         <div
-          className={`flex items-center overflow-hidden transition-all ${rechercheOuverte ? "max-w-[200px]" : "max-w-9"}`}
+          className={`flex items-center overflow-hidden rounded-lg transition-all ${rechercheOuverte ? "max-w-[200px] border border-[var(--bordure)]/50 bg-[var(--surface-mute)]/40" : "max-w-9"}`}
         >
           <Bouton
             variante="fantome"
             taille="icone"
             onClick={() => setRechercheOuverte((v) => !v)}
             aria-label="Recherche"
+            className="size-9"
           >
             <Search className="size-4" />
           </Bouton>
           {rechercheOuverte && (
-            <Entree placeholder="Rechercher…" className="ml-1 h-8 w-[140px] text-xs" />
+            <Entree placeholder="Rechercher..." className="h-8 w-[140px] border-0 bg-transparent text-xs shadow-none focus-visible:ring-0" />
           )}
         </div>
 
@@ -133,38 +138,43 @@ export function EnteteApplication({
           ongletActif === "documents" ||
           ongletActif === "mes-documents") &&
           utilisateur.role !== "rh" && (
-            <Bouton taille="sm" onClick={surNouvelleDemande} className="hidden sm:inline-flex">
+            <Bouton taille="sm" onClick={surNouvelleDemande} className="hidden gap-1.5 sm:inline-flex">
               <Plus className="size-4" />
-              Nouvelle demande
+              <span>Nouvelle demande</span>
             </Bouton>
           )}
 
         <MenuDeroulant>
           <DeclencheurMenuDeroulant asChild>
-            <Bouton variante="fantome" taille="icone" className="relative" aria-label="Notifications">
+            <Bouton variante="fantome" taille="icone" className="relative size-9" aria-label="Notifications">
               <Bell className="size-4" />
               {notifications.some((n) => !n.lue) && (
-                <span className="absolute right-1 top-1 size-2 rounded-full bg-[var(--danger)]" />
+                <span className="absolute right-1.5 top-1.5 size-2 animate-pulse rounded-full bg-[var(--danger)]" />
               )}
             </Bouton>
           </DeclencheurMenuDeroulant>
-          <ContenuMenuDeroulant align="end" className="w-80">
-            <div className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--texte-secondaire)]">
-              Notifications
+          <ContenuMenuDeroulant align="end" className="w-80 rounded-xl border-[var(--bordure)]/50 shadow-xl">
+            <div className="flex items-center justify-between px-3 py-2">
+              <span className="text-sm font-semibold">Notifications</span>
+              {notifications.some((n) => !n.lue) && (
+                <span className="rounded-full bg-[var(--danger)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--danger)]">
+                  {notifications.filter((n) => !n.lue).length} nouvelles
+                </span>
+              )}
             </div>
             <SeparateurMenuDeroulant />
             {apercu.length === 0 ? (
-              <p className="px-2 py-3 text-sm text-[var(--texte-secondaire)]">Aucune notification.</p>
+              <p className="px-3 py-6 text-center text-sm text-[var(--texte-secondaire)]">Aucune notification</p>
             ) : (
               apercu.map((n) => (
                 <ElementMenuDeroulant
                   key={n.id}
-                  className="flex flex-col items-start gap-1 whitespace-normal"
+                  className="flex flex-col items-start gap-1 whitespace-normal px-3 py-2"
                   onClick={() => marquerLue.mutate(n.id)}
                 >
-                  <span className="text-xs font-medium">{n.titre}</span>
-                  <span className="text-[11px] text-[var(--texte-secondaire)]">{n.message}</span>
-                  <span className="text-[10px] text-[var(--texte-secondaire)]/80">
+                  <span className="text-sm font-medium">{n.titre}</span>
+                  <span className="text-xs text-[var(--texte-secondaire)]">{n.message}</span>
+                  <span className="text-[10px] text-[var(--texte-secondaire)]/70">
                     {formatDistanceToNow(new Date(n.creeLe), { addSuffix: true, locale: fr })}
                   </span>
                 </ElementMenuDeroulant>
@@ -176,8 +186,9 @@ export function EnteteApplication({
                 definirOngletActif("notifications");
                 router.replace("/?page=notifications");
               }}
+              className="justify-center text-sm font-medium text-[var(--accent-principal)]"
             >
-              Tout afficher
+              Voir toutes les notifications
             </ElementMenuDeroulant>
           </ContenuMenuDeroulant>
         </MenuDeroulant>
@@ -185,8 +196,8 @@ export function EnteteApplication({
         <Bouton
           variante="fantome"
           taille="icone"
-          className="relative"
-          aria-label="Basculer le thème"
+          className="relative size-9"
+          aria-label="Basculer le theme"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
         >
           <Sun className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -197,22 +208,27 @@ export function EnteteApplication({
           <DeclencheurMenuDeroulant asChild>
             <button
               type="button"
-              className="flex items-center gap-2 rounded-[var(--rayon-md)] border border-[var(--bordure)]/80 bg-[var(--surface-mute)]/40 px-2 py-1"
+              className="group flex items-center gap-2.5 rounded-xl border border-[var(--bordure)]/50 bg-[var(--surface-mute)]/30 px-2 py-1.5 transition-all hover:border-[var(--bordure)] hover:bg-[var(--surface-mute)]/50"
             >
-              <div className="hidden text-right text-xs sm:block">
-                <div className="font-medium">{utilisateur.prenom}</div>
-                <div className="text-[10px] text-[var(--texte-secondaire)]">{utilisateur.departement}</div>
-              </div>
-              <Avatar className="size-8">
+              <Avatar className="size-8 ring-2 ring-[var(--surface-elevee)]">
                 {utilisateur.photoUrl ? <AvatarImage src={utilisateur.photoUrl} alt="" /> : null}
-                <AvatarFallback>
+                <AvatarFallback className="bg-[var(--accent-principal)]/15 text-xs font-semibold text-[var(--accent-principal)]">
                   {utilisateur.prenom[0]}
                   {utilisateur.nom[0]}
                 </AvatarFallback>
               </Avatar>
+              <div className="hidden text-left sm:block">
+                <div className="text-sm font-medium leading-tight">{utilisateur.prenom}</div>
+                <div className="text-[10px] font-medium text-[var(--texte-secondaire)]">{roleLibelle}</div>
+              </div>
             </button>
           </DeclencheurMenuDeroulant>
-          <ContenuMenuDeroulant align="end">
+          <ContenuMenuDeroulant align="end" className="w-48 rounded-xl border-[var(--bordure)]/50 shadow-xl">
+            <div className="px-3 py-2">
+              <p className="text-sm font-medium">{utilisateur.prenom} {utilisateur.nom}</p>
+              <p className="text-xs text-[var(--texte-secondaire)]">{utilisateur.departement}</p>
+            </div>
+            <SeparateurMenuDeroulant />
             <ElementMenuDeroulant
               onClick={() => {
                 definirOngletActif("mon-profil");
@@ -221,20 +237,27 @@ export function EnteteApplication({
             >
               Mon profil
             </ElementMenuDeroulant>
+            <ElementMenuDeroulant
+              onClick={() => {
+                definirOngletActif("parametres");
+                router.replace("/?page=parametres");
+              }}
+            >
+              Parametres
+            </ElementMenuDeroulant>
             <SeparateurMenuDeroulant />
             <ElementMenuDeroulant
               onClick={() => {
                 deconnecter();
                 router.replace("/login");
               }}
+              className="text-[var(--danger)]"
             >
-              Déconnexion
+              Deconnexion
             </ElementMenuDeroulant>
           </ContenuMenuDeroulant>
         </MenuDeroulant>
       </div>
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--accent-principal)]/35 to-transparent" />
     </motion.header>
   );
 }
