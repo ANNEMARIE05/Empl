@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { Bell, Menu, Moon, Plus, Search, Sun } from "lucide-react";
+import { Bell, Menu, Moon, Search, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -49,11 +49,9 @@ const titresPages: Partial<
 export function EnteteApplication({
   margeGauche,
   surMenuMobile,
-  surNouvelleDemande,
 }: {
   margeGauche: number;
   surMenuMobile: () => void;
-  surNouvelleDemande?: () => void;
 }) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
@@ -133,16 +131,7 @@ export function EnteteApplication({
           )}
         </div>
 
-        {(ongletActif === "conges" ||
-          ongletActif === "mes-conges" ||
-          ongletActif === "documents" ||
-          ongletActif === "mes-documents") &&
-          utilisateur.role !== "rh" && (
-            <Bouton taille="sm" onClick={surNouvelleDemande} className="hidden gap-1.5 sm:inline-flex">
-              <Plus className="size-4" />
-              <span>Nouvelle demande</span>
-            </Bouton>
-          )}
+
 
         <MenuDeroulant>
           <DeclencheurMenuDeroulant asChild>
