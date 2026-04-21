@@ -1,10 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
-import { motion } from "framer-motion";
-import { ChevronDown, ChevronRight, Save, Search, X, Filter, LayoutGrid, LayoutList } from "lucide-react";
+import { 
+  Calendar, 
+  Check, 
+  Clock, 
+  Filter, 
+  LayoutGrid, 
+  LayoutList, 
+  MessageSquare, 
+  Search, 
+  User, 
+  X,
+  FileText,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { CalendrierConges } from "@/components/conges/calendrier-conges";
 import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libelles-conges";
@@ -26,7 +39,7 @@ import { useConges, useMiseAJourCongeRh } from "@/hooks/queries/use-conges";
 import { useEmployes } from "@/hooks/queries/use-employes";
 import type { DemandeConge, StatutDemandeConge, TypeConge } from "@/types";
 
-const ITEMS_PAR_PAGE = 5;
+const ITEMS_PAR_PAGE = 6;
 
 function pastilleStatut(statut: StatutDemandeConge): NonNullable<PastilleProps["ton"]> {
   if (statut === "valide") return "succes";
@@ -35,32 +48,41 @@ function pastilleStatut(statut: StatutDemandeConge): NonNullable<PastilleProps["
   return "neutre";
 }
 
+function getStatutIcon(statut: StatutDemandeConge) {
+  if (statut === "valide") return <Check className="size-3" />;
+  if (statut === "refuse" || statut === "annule") return <X className="size-3" />;
+  return <Clock className="size-3" />;
+}
+
 export function PageGestionCongesRh() {
   const { data: conges = [], isLoading } = useConges();
   const { data: employes = [] } = useEmployes();
   const mutation = useMiseAJourCongeRh();
-  const [ligneOuverte, setLigneOuverte] = useState<string | null>(null);
-  const [brouillons, setBrouillons] = useState<
-    Record<string, { commentaireRh: string; noteInterneRh: string; statut: StatutDemandeConge }>
-  >({});
+  
+  // Modal state
+  const [modalOuverte, setModalOuverte] = useState(false);
+  const [demandeSelectionnee, setDemandeSelectionnee] = useState<DemandeConge | null>(null);
+  const [commentaireRh, setCommentaireRh] = useState("");
+  const [noteInterneRh, setNoteInterneRh] = useState("");
+  const [actionModal, setActionModal] = useState<"valider" | "refuser" | "traiter">("traiter");
 
   // Filtres et recherche
   const [recherche, setRecherche] = useState("");
   const [filtreStatut, setFiltreStatut] = useState<StatutDemandeConge | "tous">("tous");
   const [filtreType, setFiltreType] = useState<TypeConge | "tous">("tous");
   const [pageCourante, setPageCourante] = useState(1);
-  const [vueMode, setVueMode] = useState<"tableau" | "grille">("tableau");
+  const [vueMode, setVueMode] = useState<"tableau" | "grille">("grille");
 
   const parEmploye = useMemo(() => {
-    const map = new Map<string, string>();
-    employes.forEach((e) => map.set(e.id, `${e.prenom} ${e.nom}`));
+    const map = new Map<string, { nom: string; poste?: string }>();
+    employes.forEach((e) => map.set(e.id, { nom: `${e.prenom} ${e.nom}`, poste: e.poste }));
     return map;
   }, [employes]);
 
   // Filtrage des conges
   const congesFiltres = useMemo(() => {
     return conges.filter((d) => {
-      const nomEmploye = parEmploye.get(d.employeId)?.toLowerCase() ?? "";
+      const nomEmploye = parEmploye.get(d.employeId)?.nom.toLowerCase() ?? "";
       const matchRecherche =
         recherche === "" ||
         nomEmploye.includes(recherche.toLowerCase()) ||
@@ -86,27 +108,37 @@ export function PageGestionCongesRh() {
     setPageCourante(1);
   }, [recherche, filtreStatut, filtreType]);
 
-  const ouvrirOuBasculer = (id: string, d: DemandeConge) => {
-    setLigneOuverte((c) => (c === id ? null : id));
-    setBrouillons((prev) => ({
-      ...prev,
-      [id]: prev[id] ?? {
-        commentaireRh: d.commentaireRh ?? "",
-        noteInterneRh: d.noteInterneRh ?? "",
-        statut: d.statut,
-      },
-    }));
+  const ouvrirModal = (demande: DemandeConge, action: "valider" | "refuser" | "traiter") => {
+    setDemandeSelectionnee(demande);
+    setCommentaireRh(demande.commentaireRh ?? "");
+    setNoteInterneRh(demande.noteInterneRh ?? "");
+    setActionModal(action);
+    setModalOuverte(true);
   };
 
-  const enregistrer = async (id: string) => {
-    const b = brouillons[id];
-    if (!b) return;
+  const fermerModal = () => {
+    setModalOuverte(false);
+    setDemandeSelectionnee(null);
+    setCommentaireRh("");
+    setNoteInterneRh("");
+  };
+
+  const confirmerAction = async () => {
+    if (!demandeSelectionnee) return;
+    
+    const nouveauStatut: StatutDemandeConge = 
+      actionModal === "valider" ? "valide" : 
+      actionModal === "refuser" ? "refuse" : 
+      demandeSelectionnee.statut;
+
     await mutation.mutateAsync({
-      id,
-      commentaireRh: b.commentaireRh,
-      noteInterneRh: b.noteInterneRh,
-      statut: b.statut,
+      id: demandeSelectionnee.id,
+      commentaireRh,
+      noteInterneRh,
+      statut: nouveauStatut,
     });
+    
+    fermerModal();
   };
 
   const statutsDisponibles: { value: StatutDemandeConge | "tous"; label: string }[] = [
@@ -126,16 +158,118 @@ export function PageGestionCongesRh() {
     { value: "autre", label: "Autre" },
   ];
 
+  const calculerJours = (debut: string, fin: string) => {
+    return differenceInDays(parseISO(fin), parseISO(debut)) + 1;
+  };
+
   return (
     <div className="space-y-6">
+      {/* Modal de traitement */}
+      {modalOuverte && demandeSelectionnee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-[var(--bordure)] bg-[var(--surface-elevee)] shadow-2xl">
+            <div className="border-b border-[var(--bordure)] p-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-[var(--texte-principal)]">
+                  {actionModal === "valider" && "Valider la demande"}
+                  {actionModal === "refuser" && "Refuser la demande"}
+                  {actionModal === "traiter" && "Traiter la demande"}
+                </h2>
+                <button 
+                  onClick={fermerModal}
+                  className="rounded-lg p-2 text-[var(--texte-secondaire)] hover:bg-[var(--surface-mute)] hover:text-[var(--texte-principal)]"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-4 p-5">
+              {/* Info demande */}
+              <div className="rounded-xl bg-[var(--surface-mute)] p-4">
+                <div className="mb-2 flex items-center gap-2">
+                  <User className="size-4 text-[var(--accent-principal)]" />
+                  <span className="font-medium">
+                    {parEmploye.get(demandeSelectionnee.employeId)?.nom ?? demandeSelectionnee.employeId}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm text-[var(--texte-secondaire)]">
+                  <div className="flex items-center gap-2">
+                    <FileText className="size-3" />
+                    <span>{libelleTypeConge(demandeSelectionnee.type)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="size-3" />
+                    <span>{calculerJours(demandeSelectionnee.dateDebut, demandeSelectionnee.dateFin)} jour(s)</span>
+                  </div>
+                  <div className="col-span-2 flex items-center gap-2">
+                    <Clock className="size-3" />
+                    <span>
+                      {format(parseISO(demandeSelectionnee.dateDebut), "d MMM", { locale: fr })} - {format(parseISO(demandeSelectionnee.dateFin), "d MMM yyyy", { locale: fr })}
+                    </span>
+                  </div>
+                </div>
+                {demandeSelectionnee.motif && (
+                  <p className="mt-3 border-t border-[var(--bordure)] pt-3 text-sm text-[var(--texte-secondaire)]">
+                    <span className="font-medium text-[var(--texte-principal)]">Motif:</span> {demandeSelectionnee.motif}
+                  </p>
+                )}
+              </div>
+
+              {/* Commentaire RH */}
+              <div className="space-y-2">
+                <Etiquette htmlFor="commentaire-rh">Commentaire pour l&apos;employe</Etiquette>
+                <ZoneTexte
+                  id="commentaire-rh"
+                  rows={3}
+                  value={commentaireRh}
+                  onChange={(e) => setCommentaireRh(e.target.value)}
+                  placeholder="Ce commentaire sera visible par l'employe..."
+                />
+              </div>
+
+              {/* Note interne */}
+              <div className="space-y-2">
+                <Etiquette htmlFor="note-interne">Note interne RH</Etiquette>
+                <ZoneTexte
+                  id="note-interne"
+                  rows={2}
+                  value={noteInterneRh}
+                  onChange={(e) => setNoteInterneRh(e.target.value)}
+                  placeholder="Note interne (non visible par l'employe)..."
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-[var(--bordure)] p-5">
+              <Bouton variante="fantome" onClick={fermerModal}>
+                Annuler
+              </Bouton>
+              <Bouton 
+                onClick={() => void confirmerAction()}
+                disabled={mutation.isPending}
+                variante={actionModal === "refuser" ? "danger" : "defaut"}
+              >
+                {mutation.isPending ? "En cours..." : (
+                  actionModal === "valider" ? "Valider" :
+                  actionModal === "refuser" ? "Refuser" :
+                  "Enregistrer"
+                )}
+              </Bouton>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <Carte className="animate-shimmer">
+        <Carte>
           <CarteEntete>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <CarteTitre>File des demandes</CarteTitre>
+                <CarteTitre>Demandes de conges</CarteTitre>
                 <CarteDescription>
-                  {congesFiltres.length} demande{congesFiltres.length > 1 ? "s" : ""} trouvee{congesFiltres.length > 1 ? "s" : ""}
+                  {congesFiltres.length} demande{congesFiltres.length > 1 ? "s" : ""} 
+                  {filtreStatut === "en_attente" && " en attente de traitement"}
                 </CarteDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -165,7 +299,7 @@ export function PageGestionCongesRh() {
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--texte-secondaire)]" />
                 <input
                   type="text"
-                  placeholder="Rechercher par employe, type, motif..."
+                  placeholder="Rechercher..."
                   value={recherche}
                   onChange={(e) => setRecherche(e.target.value)}
                   className="h-10 w-full rounded-xl border border-[var(--bordure)] bg-[var(--surface-elevee)] pl-10 pr-10 text-sm placeholder:text-[var(--texte-secondaire)] focus:border-[var(--accent-principal)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-principal)]/20"
@@ -207,241 +341,202 @@ export function PageGestionCongesRh() {
             </div>
 
             {isLoading ? (
-              <div className="space-y-2">
-                <Squelette className="h-10 w-full" />
-                <Squelette className="h-10 w-full" />
-                <Squelette className="h-10 w-full" />
+              <div className="space-y-3">
+                <Squelette className="h-24 w-full rounded-xl" />
+                <Squelette className="h-24 w-full rounded-xl" />
+                <Squelette className="h-24 w-full rounded-xl" />
               </div>
-            ) : vueMode === "tableau" ? (
+            ) : vueMode === "grille" ? (
+              /* Vue Grille */
+              <div className="grid gap-3 sm:grid-cols-2">
+                {congesPagines.length === 0 ? (
+                  <div className="col-span-full py-12 text-center text-[var(--texte-secondaire)]">
+                    Aucune demande trouvee
+                  </div>
+                ) : (
+                  congesPagines.map((d) => {
+                    const emp = parEmploye.get(d.employeId);
+                    const nbJours = calculerJours(d.dateDebut, d.dateFin);
+                    
+                    return (
+                      <div
+                        key={d.id}
+                        className="rounded-xl border border-[var(--bordure)] bg-[var(--fond-base)] p-4 transition-all hover:border-[var(--accent-principal)]/30 hover:shadow-md"
+                      >
+                        {/* Header */}
+                        <div className="mb-3 flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex size-10 items-center justify-center rounded-full bg-[var(--accent-principal)]/10 text-[var(--accent-principal)]">
+                              <User className="size-5" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-[var(--texte-principal)]">
+                                {emp?.nom ?? d.employeId}
+                              </p>
+                              {emp?.poste && (
+                                <p className="text-xs text-[var(--texte-secondaire)]">{emp.poste}</p>
+                              )}
+                            </div>
+                          </div>
+                          <Pastille ton={pastilleStatut(d.statut)} className="flex items-center gap-1">
+                            {getStatutIcon(d.statut)}
+                            {libelleStatutConge(d.statut)}
+                          </Pastille>
+                        </div>
+
+                        {/* Infos */}
+                        <div className="mb-3 space-y-2 rounded-lg bg-[var(--surface-mute)] p-3">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-[var(--texte-secondaire)]">Type</span>
+                            <span className="font-medium text-[var(--texte-principal)]">{libelleTypeConge(d.type)}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-[var(--texte-secondaire)]">Duree</span>
+                            <span className="font-medium text-[var(--texte-principal)]">{nbJours} jour{nbJours > 1 ? "s" : ""}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-[var(--texte-secondaire)]">Periode</span>
+                            <span className="text-xs text-[var(--texte-principal)]">
+                              {format(parseISO(d.dateDebut), "d MMM", { locale: fr })} - {format(parseISO(d.dateFin), "d MMM", { locale: fr })}
+                            </span>
+                          </div>
+                        </div>
+
+                        {d.motif && (
+                          <p className="mb-3 text-xs text-[var(--texte-secondaire)]">
+                            <span className="font-medium">Motif:</span> {d.motif}
+                          </p>
+                        )}
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2">
+                          {d.statut === "en_attente" ? (
+                            <>
+                              <Bouton
+                                taille="sm"
+                                variante="defaut"
+                                className="flex-1"
+                                onClick={() => ouvrirModal(d, "valider")}
+                              >
+                                <Check className="size-4" />
+                                Accepter
+                              </Bouton>
+                              <Bouton
+                                taille="sm"
+                                variante="danger"
+                                className="flex-1"
+                                onClick={() => ouvrirModal(d, "refuser")}
+                              >
+                                <X className="size-4" />
+                                Refuser
+                              </Bouton>
+                            </>
+                          ) : (
+                            <Bouton
+                              taille="sm"
+                              variante="secondaire"
+                              className="w-full"
+                              onClick={() => ouvrirModal(d, "traiter")}
+                            >
+                              <MessageSquare className="size-4" />
+                              Voir / Modifier
+                            </Bouton>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            ) : (
+              /* Vue Tableau */
               <Tableau>
                 <TableauEntete>
                   <TableauRangee>
-                    <TableauCelluleEntete className="w-8" />
                     <TableauCelluleEntete>Employe</TableauCelluleEntete>
                     <TableauCelluleEntete>Type</TableauCelluleEntete>
                     <TableauCelluleEntete>Periode</TableauCelluleEntete>
+                    <TableauCelluleEntete>Jours</TableauCelluleEntete>
                     <TableauCelluleEntete>Statut</TableauCelluleEntete>
-                    <TableauCelluleEntete>Commentaire</TableauCelluleEntete>
+                    <TableauCelluleEntete className="text-right">Actions</TableauCelluleEntete>
                   </TableauRangee>
                 </TableauEntete>
                 <TableauCorps>
                   {congesPagines.length === 0 ? (
                     <TableauRangee>
-                      <TableauCellule colSpan={6} className="py-8 text-center text-[var(--texte-secondaire)]">
+                      <TableauCellule colSpan={6} className="py-12 text-center text-[var(--texte-secondaire)]">
                         Aucune demande trouvee
                       </TableauCellule>
                     </TableauRangee>
                   ) : (
                     congesPagines.map((d) => {
-                      const ouvert = ligneOuverte === d.id;
-                      const b = brouillons[d.id];
+                      const emp = parEmploye.get(d.employeId);
+                      const nbJours = calculerJours(d.dateDebut, d.dateFin);
+                      
                       return (
-                        <React.Fragment key={d.id}>
-                          <TableauRangee
-                            className="ligne-liste-luxe cursor-pointer"
-                            onClick={() => ouvrirOuBasculer(d.id, d)}
-                          >
-                            <TableauCellule>
-                              {ouvert ? (
-                                <ChevronDown className="size-4 text-[var(--texte-secondaire)]" />
-                              ) : (
-                                <ChevronRight className="size-4 text-[var(--texte-secondaire)]" />
+                        <TableauRangee key={d.id} className="hover:bg-[var(--surface-mute)]/50">
+                          <TableauCellule>
+                            <div>
+                              <p className="font-medium text-[var(--texte-principal)]">
+                                {emp?.nom ?? d.employeId}
+                              </p>
+                              {emp?.poste && (
+                                <p className="text-xs text-[var(--texte-secondaire)]">{emp.poste}</p>
                               )}
-                            </TableauCellule>
-                            <TableauCellule className="font-medium">
-                              {parEmploye.get(d.employeId) ?? d.employeId}
-                            </TableauCellule>
-                            <TableauCellule>{libelleTypeConge(d.type)}</TableauCellule>
-                            <TableauCellule className="whitespace-nowrap text-xs">
-                              {format(parseISO(d.dateDebut), "d MMM", { locale: fr })} →{" "}
-                              {format(parseISO(d.dateFin), "d MMM yyyy", { locale: fr })}
-                            </TableauCellule>
-                            <TableauCellule>
-                              <Pastille ton={pastilleStatut(d.statut)}>{libelleStatutConge(d.statut)}</Pastille>
-                            </TableauCellule>
-                            <TableauCellule className="max-w-[220px] truncate text-xs text-[var(--texte-secondaire)]">
-                              {d.commentaireRh || "—"}
-                            </TableauCellule>
-                          </TableauRangee>
-                          {ouvert && b ? (
-                            <TableauRangee>
-                              <TableauCellule colSpan={6} className="bg-[var(--surface-mute)]/40 p-4">
-                                <motion.div
-                                  initial={{ opacity: 0, y: 6 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  className="grid gap-4 md:grid-cols-2"
+                            </div>
+                          </TableauCellule>
+                          <TableauCellule>{libelleTypeConge(d.type)}</TableauCellule>
+                          <TableauCellule className="whitespace-nowrap text-sm">
+                            {format(parseISO(d.dateDebut), "d MMM", { locale: fr })} - {format(parseISO(d.dateFin), "d MMM", { locale: fr })}
+                          </TableauCellule>
+                          <TableauCellule className="text-center font-medium">
+                            {nbJours}
+                          </TableauCellule>
+                          <TableauCellule>
+                            <Pastille ton={pastilleStatut(d.statut)} className="flex w-fit items-center gap-1">
+                              {getStatutIcon(d.statut)}
+                              {libelleStatutConge(d.statut)}
+                            </Pastille>
+                          </TableauCellule>
+                          <TableauCellule className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {d.statut === "en_attente" ? (
+                                <>
+                                  <Bouton
+                                    taille="sm"
+                                    variante="defaut"
+                                    onClick={() => ouvrirModal(d, "valider")}
+                                  >
+                                    <Check className="size-3" />
+                                    Accepter
+                                  </Bouton>
+                                  <Bouton
+                                    taille="sm"
+                                    variante="danger"
+                                    onClick={() => ouvrirModal(d, "refuser")}
+                                  >
+                                    <X className="size-3" />
+                                    Refuser
+                                  </Bouton>
+                                </>
+                              ) : (
+                                <Bouton
+                                  taille="sm"
+                                  variante="secondaire"
+                                  onClick={() => ouvrirModal(d, "traiter")}
                                 >
-                                  <div className="space-y-2">
-                                    <Etiquette>Commentaire RH (partage / dossier)</Etiquette>
-                                    <ZoneTexte
-                                      rows={4}
-                                      value={b.commentaireRh}
-                                      onChange={(e) =>
-                                        setBrouillons((prev) => ({
-                                          ...prev,
-                                          [d.id]: { ...b, commentaireRh: e.target.value },
-                                        }))
-                                      }
-                                      placeholder="Message transmis a l'employe ou consigne au dossier..."
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Etiquette>Note interne RH</Etiquette>
-                                    <ZoneTexte
-                                      rows={4}
-                                      value={b.noteInterneRh}
-                                      onChange={(e) =>
-                                        setBrouillons((prev) => ({
-                                          ...prev,
-                                          [d.id]: { ...b, noteInterneRh: e.target.value },
-                                        }))
-                                      }
-                                      placeholder="Memo interne : contexte manager, risque couverture..."
-                                    />
-                                    <div className="space-y-2">
-                                      <Etiquette>Statut</Etiquette>
-                                      <select
-                                        className="h-9 w-full rounded-[var(--rayon-md)] border border-[var(--bordure)] bg-[var(--surface-elevee)] px-2 text-sm"
-                                        value={b.statut}
-                                        onChange={(e) =>
-                                          setBrouillons((prev) => ({
-                                            ...prev,
-                                            [d.id]: { ...b, statut: e.target.value as StatutDemandeConge },
-                                          }))
-                                        }
-                                      >
-                                        {(
-                                          ["en_attente", "valide", "refuse", "annule"] as StatutDemandeConge[]
-                                        ).map((s) => (
-                                          <option key={s} value={s}>
-                                            {libelleStatutConge(s)}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                    <Bouton
-                                      type="button"
-                                      onClick={(ev) => {
-                                        ev.stopPropagation();
-                                        void enregistrer(d.id);
-                                      }}
-                                      disabled={mutation.isPending}
-                                      className="w-full md:w-auto"
-                                    >
-                                      <Save className="size-4" />
-                                      Enregistrer le traitement
-                                    </Bouton>
-                                  </div>
-                                </motion.div>
-                              </TableauCellule>
-                            </TableauRangee>
-                          ) : null}
-                        </React.Fragment>
+                                  <MessageSquare className="size-3" />
+                                  Voir
+                                </Bouton>
+                              )}
+                            </div>
+                          </TableauCellule>
+                        </TableauRangee>
                       );
                     })
                   )}
                 </TableauCorps>
               </Tableau>
-            ) : (
-              /* Vue Grille */
-              <div className="grid gap-4 sm:grid-cols-2">
-                {congesPagines.length === 0 ? (
-                  <div className="col-span-full py-8 text-center text-[var(--texte-secondaire)]">
-                    Aucune demande trouvee
-                  </div>
-                ) : (
-                  congesPagines.map((d) => {
-                    const ouvert = ligneOuverte === d.id;
-                    const b = brouillons[d.id];
-                    return (
-                      <motion.div
-                        key={d.id}
-                        layout
-                        className="rounded-xl border border-[var(--bordure)] bg-[var(--surface-elevee)] p-4 transition-shadow hover:shadow-md"
-                      >
-                        <div
-                          className="cursor-pointer"
-                          onClick={() => ouvrirOuBasculer(d.id, d)}
-                        >
-                          <div className="mb-3 flex items-start justify-between">
-                            <div>
-                              <p className="font-semibold text-[var(--texte-principal)]">
-                                {parEmploye.get(d.employeId) ?? d.employeId}
-                              </p>
-                              <p className="text-sm text-[var(--texte-secondaire)]">
-                                {libelleTypeConge(d.type)}
-                              </p>
-                            </div>
-                            <Pastille ton={pastilleStatut(d.statut)}>{libelleStatutConge(d.statut)}</Pastille>
-                          </div>
-                          <p className="mb-2 text-xs text-[var(--texte-secondaire)]">
-                            {format(parseISO(d.dateDebut), "d MMM", { locale: fr })} →{" "}
-                            {format(parseISO(d.dateFin), "d MMM yyyy", { locale: fr })}
-                          </p>
-                          {d.commentaireRh && (
-                            <p className="truncate text-xs text-[var(--texte-secondaire)]">
-                              {d.commentaireRh}
-                            </p>
-                          )}
-                        </div>
-                        {ouvert && b && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            className="mt-4 space-y-3 border-t border-[var(--bordure)] pt-4"
-                          >
-                            <div className="space-y-2">
-                              <Etiquette>Commentaire RH</Etiquette>
-                              <ZoneTexte
-                                rows={2}
-                                value={b.commentaireRh}
-                                onChange={(e) =>
-                                  setBrouillons((prev) => ({
-                                    ...prev,
-                                    [d.id]: { ...b, commentaireRh: e.target.value },
-                                  }))
-                                }
-                                placeholder="Message transmis a l'employe..."
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Etiquette>Statut</Etiquette>
-                              <select
-                                className="h-9 w-full rounded-[var(--rayon-md)] border border-[var(--bordure)] bg-[var(--surface-elevee)] px-2 text-sm"
-                                value={b.statut}
-                                onChange={(e) =>
-                                  setBrouillons((prev) => ({
-                                    ...prev,
-                                    [d.id]: { ...b, statut: e.target.value as StatutDemandeConge },
-                                  }))
-                                }
-                              >
-                                {(["en_attente", "valide", "refuse", "annule"] as StatutDemandeConge[]).map((s) => (
-                                  <option key={s} value={s}>
-                                    {libelleStatutConge(s)}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <Bouton
-                              type="button"
-                              onClick={(ev) => {
-                                ev.stopPropagation();
-                                void enregistrer(d.id);
-                              }}
-                              disabled={mutation.isPending}
-                              className="w-full"
-                            >
-                              <Save className="size-4" />
-                              Enregistrer
-                            </Bouton>
-                          </motion.div>
-                        )}
-                      </motion.div>
-                    );
-                  })
-                )}
-              </div>
             )}
 
             {/* Pagination */}
@@ -450,35 +545,44 @@ export function PageGestionCongesRh() {
                 <p className="text-sm text-[var(--texte-secondaire)]">
                   Page {pageCourante} sur {totalPages}
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <Bouton
-                    taille="sm"
-                    variante="secondaire"
+                    taille="icone"
+                    variante="fantome"
                     onClick={() => setPageCourante((p) => Math.max(1, p - 1))}
                     disabled={pageCourante === 1}
                   >
-                    Precedent
+                    <ChevronLeft className="size-4" />
                   </Bouton>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let page: number;
+                    if (totalPages <= 5) {
+                      page = i + 1;
+                    } else if (pageCourante <= 3) {
+                      page = i + 1;
+                    } else if (pageCourante >= totalPages - 2) {
+                      page = totalPages - 4 + i;
+                    } else {
+                      page = pageCourante - 2 + i;
+                    }
+                    return (
                       <Bouton
                         key={page}
-                        taille="sm"
+                        taille="icone"
                         variante={page === pageCourante ? "defaut" : "fantome"}
                         onClick={() => setPageCourante(page)}
-                        className="min-w-[36px]"
                       >
                         {page}
                       </Bouton>
-                    ))}
-                  </div>
+                    );
+                  })}
                   <Bouton
-                    taille="sm"
-                    variante="secondaire"
+                    taille="icone"
+                    variante="fantome"
                     onClick={() => setPageCourante((p) => Math.min(totalPages, p + 1))}
                     disabled={pageCourante === totalPages}
                   >
-                    Suivant
+                    <ChevronRight className="size-4" />
                   </Bouton>
                 </div>
               </div>
