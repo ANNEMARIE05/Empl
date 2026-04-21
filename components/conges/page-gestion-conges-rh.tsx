@@ -3,8 +3,10 @@
 import * as React from "react";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
+import { motion } from "framer-motion";
 import { 
   Calendar, 
+  CalendarCheck,
   Check, 
   Clock, 
   Filter, 
@@ -12,12 +14,15 @@ import {
   LayoutList, 
   MessageSquare, 
   Search, 
+  TrendingUp,
   User, 
+  Users,
   X,
   FileText,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import { NombreAnime } from "@/components/metrique/nombre-anime";
 import { useMemo, useState } from "react";
 import { CalendrierConges } from "@/components/conges/calendrier-conges";
 import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libelles-conges";
@@ -162,8 +167,118 @@ export function PageGestionCongesRh() {
     return differenceInDays(parseISO(fin), parseISO(debut)) + 1;
   };
 
+  // Stats calculees
+  const statsConges = useMemo(() => {
+    const enAttente = conges.filter((c) => c.statut === "en_attente").length;
+    const valides = conges.filter((c) => c.statut === "valide").length;
+    const refuses = conges.filter((c) => c.statut === "refuse").length;
+    const tauxValidation = conges.length > 0 
+      ? Math.round((valides / (valides + refuses || 1)) * 100) 
+      : 0;
+    const joursTotal = conges
+      .filter((c) => c.statut === "valide")
+      .reduce((acc, c) => acc + calculerJours(c.dateDebut, c.dateFin), 0);
+    return { enAttente, valides, refuses, tauxValidation, joursTotal };
+  }, [conges]);
+
   return (
     <div className="space-y-6">
+      {/* Stats en haut avec calendrier en flex */}
+      <div className="flex flex-col gap-6 xl:flex-row">
+        {/* Stats Cards */}
+        <div className="grid flex-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+            <Carte className="relative h-full overflow-hidden">
+              <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-[var(--accent-principal)]/20 blur-2xl" />
+              <CarteEntete>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15">
+                    <Clock className="size-5 text-[var(--accent-principal)]" />
+                  </div>
+                  <div>
+                    <CarteTitre className="text-sm">En attente</CarteTitre>
+                    <CarteDescription className="text-xs">A traiter</CarteDescription>
+                  </div>
+                </div>
+              </CarteEntete>
+              <CarteContenu>
+                <p className="text-3xl font-bold text-[var(--accent-principal)]">
+                  <NombreAnime valeur={statsConges.enAttente} />
+                </p>
+              </CarteContenu>
+            </Carte>
+          </motion.div>
+
+          <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+            <Carte className="h-full">
+              <CarteEntete>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/15">
+                    <CalendarCheck className="size-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <CarteTitre className="text-sm">Valides</CarteTitre>
+                    <CarteDescription className="text-xs">Approuves</CarteDescription>
+                  </div>
+                </div>
+              </CarteEntete>
+              <CarteContenu>
+                <p className="text-3xl font-bold text-emerald-600">
+                  <NombreAnime valeur={statsConges.valides} />
+                </p>
+              </CarteContenu>
+            </Carte>
+          </motion.div>
+
+          <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+            <Carte className="h-full">
+              <CarteEntete>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/15">
+                    <TrendingUp className="size-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <CarteTitre className="text-sm">Taux validation</CarteTitre>
+                    <CarteDescription className="text-xs">Global</CarteDescription>
+                  </div>
+                </div>
+              </CarteEntete>
+              <CarteContenu>
+                <p className="text-3xl font-bold text-blue-600">
+                  <NombreAnime valeur={statsConges.tauxValidation} suffixe="%" />
+                </p>
+              </CarteContenu>
+            </Carte>
+          </motion.div>
+
+          <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+            <Carte className="h-full">
+              <CarteEntete>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/15">
+                    <Calendar className="size-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <CarteTitre className="text-sm">Jours accordes</CarteTitre>
+                    <CarteDescription className="text-xs">Total</CarteDescription>
+                  </div>
+                </div>
+              </CarteEntete>
+              <CarteContenu>
+                <p className="text-3xl font-bold text-purple-600">
+                  <NombreAnime valeur={statsConges.joursTotal} suffixe="j" />
+                </p>
+              </CarteContenu>
+            </Carte>
+          </motion.div>
+        </div>
+
+        {/* Calendrier en flex a droite sur xl */}
+        <div className="xl:w-[420px]">
+          <CalendrierConges demandes={conges} compact />
+        </div>
+      </div>
+
       {/* Modal de traitement */}
       {modalOuverte && demandeSelectionnee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -261,7 +376,7 @@ export function PageGestionCongesRh() {
         </div>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid gap-6">
         <Carte>
           <CarteEntete>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -589,8 +704,6 @@ export function PageGestionCongesRh() {
             )}
           </CarteContenu>
         </Carte>
-
-        <CalendrierConges demandes={conges} />
       </div>
     </div>
   );

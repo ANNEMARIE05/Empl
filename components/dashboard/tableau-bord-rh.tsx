@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { CalendarCheck, Clock, FileStack, TrendingUp } from "lucide-react";
+import { CalendarCheck, Clock, FileStack, TrendingUp, Users, UserCheck, Briefcase } from "lucide-react";
 import { NombreAnime } from "@/components/metrique/nombre-anime";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
 import { useConges } from "@/hooks/queries/use-conges";
 import { useDocuments } from "@/hooks/queries/use-documents";
+import { useEmployes } from "@/hooks/queries/use-employes";
 import { useStatistiques } from "@/hooks/queries/use-statistiques";
 import {
   Area,
@@ -28,13 +29,108 @@ const couleurAccent = "#d4a500";
 export function TableauBordRh() {
   const { data: conges = [] } = useConges();
   const { data: documents = [] } = useDocuments();
+  const { data: employes = [] } = useEmployes();
   const { data: stats } = useStatistiques(true);
 
   const enAttenteConges = conges.filter((c) => c.statut === "en_attente").length;
   const enAttenteDocs = documents.filter((d) => d.statut === "en_attente" || d.statut === "en_traitement").length;
+  
+  // Stats employes
+  const totalEmployes = employes.length;
+  const employesRh = employes.filter((e) => e.role === "rh").length;
+  const employesManager = employes.filter((e) => e.role === "manager").length;
+  const departementsUniques = new Set(employes.map((e) => e.departement)).size;
 
   return (
     <div className="space-y-6">
+      {/* Stats employes */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="relative h-full overflow-hidden border-l-4 border-l-[var(--accent-principal)]">
+            <CarteEntete>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15">
+                  <Users className="size-5 text-[var(--accent-principal)]" />
+                </div>
+                <div>
+                  <CarteTitre>Total employes</CarteTitre>
+                  <CarteDescription>Effectif global</CarteDescription>
+                </div>
+              </div>
+            </CarteEntete>
+            <CarteContenu>
+              <p className="text-4xl font-bold text-[var(--accent-principal)]">
+                <NombreAnime valeur={totalEmployes} />
+              </p>
+            </CarteContenu>
+          </Carte>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="h-full border-l-4 border-l-blue-500">
+            <CarteEntete>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/15">
+                  <UserCheck className="size-5 text-blue-600" />
+                </div>
+                <div>
+                  <CarteTitre>Equipe RH</CarteTitre>
+                  <CarteDescription>Ressources humaines</CarteDescription>
+                </div>
+              </div>
+            </CarteEntete>
+            <CarteContenu>
+              <p className="text-4xl font-bold text-blue-600">
+                <NombreAnime valeur={employesRh} />
+              </p>
+            </CarteContenu>
+          </Carte>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="h-full border-l-4 border-l-purple-500">
+            <CarteEntete>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/15">
+                  <UserCheck className="size-5 text-purple-600" />
+                </div>
+                <div>
+                  <CarteTitre>Managers</CarteTitre>
+                  <CarteDescription>Responsables equipes</CarteDescription>
+                </div>
+              </div>
+            </CarteEntete>
+            <CarteContenu>
+              <p className="text-4xl font-bold text-purple-600">
+                <NombreAnime valeur={employesManager} />
+              </p>
+            </CarteContenu>
+          </Carte>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="h-full border-l-4 border-l-emerald-500">
+            <CarteEntete>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/15">
+                  <Briefcase className="size-5 text-emerald-600" />
+                </div>
+                <div>
+                  <CarteTitre>Departements</CarteTitre>
+                  <CarteDescription>Services actifs</CarteDescription>
+                </div>
+              </div>
+            </CarteEntete>
+            <CarteContenu>
+              <p className="text-4xl font-bold text-emerald-600">
+                <NombreAnime valeur={departementsUniques} />
+              </p>
+            </CarteContenu>
+          </Carte>
+        </motion.div>
+      </div>
+
+      {/* Stats activite */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
           <Carte className="relative h-full overflow-hidden">

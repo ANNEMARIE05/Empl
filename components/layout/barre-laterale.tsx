@@ -327,23 +327,57 @@ export function BarreLaterale({
       </AnimatePresence>
 
       <Dialogue open={confirmerSortie} onOpenChange={setConfirmerSortie}>
-        <ContenuDialogue>
+        <ContenuDialogue className="max-w-md">
           <EnteteDialogue>
-            <TitreDialogue>Quitter la session ?</TitreDialogue>
+            <div className="flex items-center gap-3">
+              <div className="flex size-12 items-center justify-center rounded-full bg-red-500/15">
+                <LogOut className="size-6 text-red-500" />
+              </div>
+              <div>
+                <TitreDialogue>Confirmer la deconnexion</TitreDialogue>
+                <p className="mt-1 text-sm text-[var(--texte-secondaire)]">
+                  Vous allez quitter votre session
+                </p>
+              </div>
+            </div>
           </EnteteDialogue>
-          <div className="flex justify-end gap-2">
+          
+          <div className="my-4 rounded-xl bg-[var(--surface-mute)] p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-full bg-[var(--accent-principal)]/15">
+                <span className="text-sm font-semibold text-[var(--accent-principal)]">
+                  {utilisateur?.prenom?.[0]}{utilisateur?.nom?.[0]}
+                </span>
+              </div>
+              <div>
+                <p className="font-medium text-[var(--texte-principal)]">
+                  {utilisateur?.prenom} {utilisateur?.nom}
+                </p>
+                <p className="text-sm text-[var(--texte-secondaire)]">
+                  {utilisateur?.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-sm text-[var(--texte-secondaire)]">
+            Etes-vous sur de vouloir vous deconnecter ? Vous devrez vous reconnecter pour acceder a votre espace.
+          </p>
+
+          <div className="mt-6 flex items-center justify-end gap-3">
             <Bouton variante="secondaire" onClick={() => setConfirmerSortie(false)}>
               Annuler
             </Bouton>
             <Bouton
-              variante="destructif"
+              variante="danger"
               onClick={() => {
                 deconnecter();
                 setConfirmerSortie(false);
                 router.replace("/login");
               }}
             >
-              Déconnexion
+              <LogOut className="size-4" />
+              Se deconnecter
             </Bouton>
           </div>
         </ContenuDialogue>

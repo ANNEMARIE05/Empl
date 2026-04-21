@@ -21,7 +21,7 @@ import { Bouton } from "@/components/ui/button";
 import type { DemandeConge } from "@/types";
 import { libelleStatutConge } from "@/components/conges/libelles-conges";
 
-export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
+export function CalendrierConges({ demandes, compact = false }: { demandes: DemandeConge[]; compact?: boolean }) {
   const [moisCourant, setMoisCourant] = useState(() => startOfMonth(new Date()));
 
   const grille = useMemo(() => {
@@ -112,7 +112,7 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
                 layout
                 key={jour.toISOString()}
                 transition={{ duration: 0.15 }}
-                className={`group relative flex min-h-[72px] flex-col rounded-xl border p-2 transition-all ${
+                className={`group relative flex ${compact ? "min-h-[52px]" : "min-h-[72px]"} flex-col rounded-xl border p-2 transition-all ${
                   dansMois
                     ? estAujourdhui
                       ? "border-[var(--accent-principal)]/50 bg-[var(--accent-principal)]/10 shadow-sm"
@@ -135,7 +135,7 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
                   <span className="absolute right-2 top-2 size-1.5 rounded-full bg-[var(--accent-principal)]" />
                 )}
                 <div className="mt-auto flex flex-col gap-0.5">
-                  {chevauche.slice(0, 2).map((d) => (
+                  {chevauche.slice(0, compact ? 1 : 2).map((d) => (
                     <div
                       key={d.id}
                       title={`${libelleStatutConge(d.statut)} - ${d.motif ?? ""}`}
@@ -147,12 +147,12 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
                             : "bg-[var(--accent-principal)]/20 text-[var(--texte-principal)]"
                       }`}
                     >
-                      {d.type.slice(0, 4)}
+                      {compact ? "" : d.type.slice(0, 4)}
                     </div>
                   ))}
-                  {chevauche.length > 2 && (
+                  {chevauche.length > (compact ? 1 : 2) && (
                     <span className="text-[10px] font-medium text-[var(--texte-secondaire)]">
-                      +{chevauche.length - 2}
+                      +{chevauche.length - (compact ? 1 : 2)}
                     </span>
                   )}
                 </div>
