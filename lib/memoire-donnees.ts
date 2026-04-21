@@ -35,6 +35,25 @@ export function trouverEmployeParId(id: string): Employe | undefined {
   return employes.find((e) => e.id === id);
 }
 
+export function ajouterEmploye(e: Employe): Employe {
+  employes = [e, ...employes];
+  return e;
+}
+
+export function mettreAJourEmploye(id: string, patch: Partial<Omit<Employe, "id">>): Employe | null {
+  const idx = employes.findIndex((e) => e.id === id);
+  if (idx === -1) return null;
+  employes[idx] = { ...employes[idx], ...patch };
+  return employes[idx];
+}
+
+export function supprimerEmploye(id: string): boolean {
+  const idx = employes.findIndex((e) => e.id === id);
+  if (idx === -1) return false;
+  employes.splice(idx, 1);
+  return true;
+}
+
 export function lireConges(): DemandeConge[] {
   return demandesConges;
 }
