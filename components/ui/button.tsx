@@ -10,6 +10,8 @@ const variantesBouton = cva(
       variante: {
         defaut:
           "bg-[var(--accent-principal)] text-[var(--texte-sur-accent)] shadow-md shadow-[var(--accent-principal)]/20 hover:brightness-105 hover:shadow-lg hover:shadow-[var(--accent-principal)]/25 active:scale-[0.98]",
+        principal:
+          "bg-[var(--accent-principal)] text-[var(--texte-sur-accent)] shadow-md shadow-[var(--accent-principal)]/20 hover:brightness-105 hover:shadow-lg hover:shadow-[var(--accent-principal)]/25 active:scale-[0.98]",
         secondaire:
           "border border-[var(--bordure)]/60 bg-[var(--surface-elevee)] text-[var(--texte-principal)] hover:bg-[var(--surface-mute)] hover:border-[var(--bordure)]",
         fantome: "hover:bg-[var(--surface-mute)] text-[var(--texte-principal)]",
