@@ -10,7 +10,7 @@ import { Pastille } from "@/components/ui/badge";
 import { Squelette } from "@/components/ui/skeleton";
 import { Bouton } from "@/components/ui/button";
 import { Entree } from "@/components/ui/input";
-import { Libelle } from "@/components/ui/label";
+import { Etiquette } from "@/components/ui/label";
 import {
   Tableau,
   TableauCellule,
@@ -91,7 +91,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Libelle htmlFor="prenom">Prenom</Libelle>
+          <Etiquette htmlFor="prenom">Prenom</Etiquette>
           <Entree
             id="prenom"
             value={prenom}
@@ -101,7 +101,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
           />
         </div>
         <div className="space-y-2">
-          <Libelle htmlFor="nom">Nom</Libelle>
+          <Etiquette htmlFor="nom">Nom</Etiquette>
           <Entree
             id="nom"
             value={nom}
@@ -112,7 +112,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
         </div>
       </div>
       <div className="space-y-2">
-        <Libelle htmlFor="email">Email</Libelle>
+        <Etiquette htmlFor="email">Email</Etiquette>
         <Entree
           id="email"
           type="email"
@@ -124,7 +124,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Libelle htmlFor="role">Role</Libelle>
+          <Etiquette htmlFor="role">Role</Etiquette>
           <FiltreSelect
             valeur={role}
             onChangerValeur={(v) => setRole(v as RoleUtilisateur)}
@@ -135,7 +135,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
           />
         </div>
         <div className="space-y-2">
-          <Libelle htmlFor="departement">Departement</Libelle>
+          <Etiquette htmlFor="departement">Departement</Etiquette>
           <FiltreSelect
             valeur={departement}
             onChangerValeur={setDepartement}
@@ -148,7 +148,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Libelle htmlFor="poste">Poste</Libelle>
+          <Etiquette htmlFor="poste">Poste</Etiquette>
           <Entree
             id="poste"
             value={poste}
@@ -158,7 +158,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
           />
         </div>
         <div className="space-y-2">
-          <Libelle htmlFor="dateEmbauche">Date d&apos;embauche</Libelle>
+          <Etiquette htmlFor="dateEmbauche">Date d&apos;embauche</Etiquette>
           <Entree
             id="dateEmbauche"
             type="date"
