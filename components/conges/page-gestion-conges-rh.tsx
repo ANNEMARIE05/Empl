@@ -23,6 +23,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { NombreAnime } from "@/components/metrique/nombre-anime";
+import { Pagination } from "@/components/ui/pagination";
 import { useMemo, useState } from "react";
 import { CalendrierConges } from "@/components/conges/calendrier-conges";
 import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libelles-conges";
@@ -185,96 +186,87 @@ export function PageGestionCongesRh() {
     <div className="space-y-6">
       {/* Stats en haut avec calendrier en flex */}
       <div className="flex flex-col gap-6 xl:flex-row">
-        {/* Stats Cards */}
-        <div className="grid flex-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-            <Carte className="relative h-full overflow-hidden">
-              <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-[var(--accent-principal)]/20 blur-2xl" />
-              <CarteEntete>
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15">
-                    <Clock className="size-5 text-[var(--accent-principal)]" />
-                  </div>
-                  <div>
-                    <CarteTitre className="text-sm">En attente</CarteTitre>
-                    <CarteDescription className="text-xs">A traiter</CarteDescription>
-                  </div>
+        {/* Stats Cards - 2 colonnes ameliorees */}
+        <div className="grid flex-1 gap-4 sm:grid-cols-2">
+          {/* Card En attente - Mise en avant */}
+          <motion.div whileHover={{ y: -4, scale: 1.01 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+            <Carte className="relative h-full overflow-hidden border-l-4 border-l-[var(--accent-principal)]">
+              <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-[var(--accent-principal)]/15 blur-3xl" />
+              <CarteContenu className="flex items-center gap-4 p-5">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
+                  <Clock className="size-7 text-[var(--accent-principal)]" />
                 </div>
-              </CarteEntete>
-              <CarteContenu>
-                <p className="text-3xl font-bold text-[var(--accent-principal)]">
-                  <NombreAnime valeur={statsConges.enAttente} />
-                </p>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-[var(--texte-secondaire)]">En attente</p>
+                  <p className="text-4xl font-bold text-[var(--accent-principal)]">
+                    <NombreAnime valeur={statsConges.enAttente} />
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--texte-secondaire)]">Demandes a traiter</p>
+                </div>
               </CarteContenu>
             </Carte>
           </motion.div>
 
-          <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-            <Carte className="h-full">
-              <CarteEntete>
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/15">
-                    <CalendarCheck className="size-5 text-emerald-600" />
-                  </div>
-                  <div>
-                    <CarteTitre className="text-sm">Valides</CarteTitre>
-                    <CarteDescription className="text-xs">Approuves</CarteDescription>
-                  </div>
+          {/* Card Valides */}
+          <motion.div whileHover={{ y: -4, scale: 1.01 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+            <Carte className="relative h-full overflow-hidden border-l-4 border-l-emerald-500">
+              <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-emerald-500/15 blur-3xl" />
+              <CarteContenu className="flex items-center gap-4 p-5">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15">
+                  <CalendarCheck className="size-7 text-emerald-600" />
                 </div>
-              </CarteEntete>
-              <CarteContenu>
-                <p className="text-3xl font-bold text-emerald-600">
-                  <NombreAnime valeur={statsConges.valides} />
-                </p>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-[var(--texte-secondaire)]">Valides</p>
+                  <p className="text-4xl font-bold text-emerald-600">
+                    <NombreAnime valeur={statsConges.valides} />
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--texte-secondaire)]">Demandes approuvees</p>
+                </div>
               </CarteContenu>
             </Carte>
           </motion.div>
 
-          <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-            <Carte className="h-full">
-              <CarteEntete>
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/15">
-                    <TrendingUp className="size-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <CarteTitre className="text-sm">Taux validation</CarteTitre>
-                    <CarteDescription className="text-xs">Global</CarteDescription>
-                  </div>
+          {/* Card Taux validation */}
+          <motion.div whileHover={{ y: -4, scale: 1.01 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+            <Carte className="relative h-full overflow-hidden border-l-4 border-l-blue-500">
+              <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-blue-500/15 blur-3xl" />
+              <CarteContenu className="flex items-center gap-4 p-5">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-blue-500/15">
+                  <TrendingUp className="size-7 text-blue-600" />
                 </div>
-              </CarteEntete>
-              <CarteContenu>
-                <p className="text-3xl font-bold text-blue-600">
-                  <NombreAnime valeur={statsConges.tauxValidation} suffixe="%" />
-                </p>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-[var(--texte-secondaire)]">Taux de validation</p>
+                  <p className="text-4xl font-bold text-blue-600">
+                    <NombreAnime valeur={statsConges.tauxValidation} suffixe="%" />
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--texte-secondaire)]">Performance globale</p>
+                </div>
               </CarteContenu>
             </Carte>
           </motion.div>
 
-          <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-            <Carte className="h-full">
-              <CarteEntete>
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/15">
-                    <Calendar className="size-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <CarteTitre className="text-sm">Jours accordes</CarteTitre>
-                    <CarteDescription className="text-xs">Total</CarteDescription>
-                  </div>
+          {/* Card Jours accordes */}
+          <motion.div whileHover={{ y: -4, scale: 1.01 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+            <Carte className="relative h-full overflow-hidden border-l-4 border-l-purple-500">
+              <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-purple-500/15 blur-3xl" />
+              <CarteContenu className="flex items-center gap-4 p-5">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-purple-500/15">
+                  <Calendar className="size-7 text-purple-600" />
                 </div>
-              </CarteEntete>
-              <CarteContenu>
-                <p className="text-3xl font-bold text-purple-600">
-                  <NombreAnime valeur={statsConges.joursTotal} suffixe="j" />
-                </p>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-[var(--texte-secondaire)]">Jours accordes</p>
+                  <p className="text-4xl font-bold text-purple-600">
+                    <NombreAnime valeur={statsConges.joursTotal} suffixe="j" />
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--texte-secondaire)]">Total cette periode</p>
+                </div>
               </CarteContenu>
             </Carte>
           </motion.div>
         </div>
 
         {/* Calendrier en flex a droite sur xl */}
-        <div className="xl:w-[420px]">
+        <div className="xl:w-[400px]">
           <CalendrierConges demandes={conges} compact />
         </div>
       </div>
