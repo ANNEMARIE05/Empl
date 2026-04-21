@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
+/* Design tokens — sémantique FR, palette jaune / blanc / noir */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --texte-principal: oklch(0.18 0.02 95);
+  --texte-secondaire: oklch(0.45 0.02 95);
+  --surface-racine: oklch(0.985 0.01 95);
+  --surface-elevee: oklch(0.99 0.008 95);
+  --surface-mute: oklch(0.94 0.02 95);
+  --accent-principal: oklch(0.82 0.16 95);
+  --texte-sur-accent: oklch(0.16 0.02 95);
+  --bordure: oklch(0.88 0.02 95);
+  --anneau: oklch(0.75 0.14 95);
+  --danger: oklch(0.55 0.2 25);
+  --barre-laterale: oklch(0.14 0.02 95);
+  --barre-laterale-texte: oklch(0.92 0.01 95);
+  --barre-laterale-accent: oklch(0.82 0.16 95);
+  --rayon-sm: 0.35rem;
+  --rayon-md: 0.5rem;
+  --rayon-lg: 0.65rem;
+  --ombre-douce: 0 18px 50px -28px oklch(0.2 0.02 95 / 0.18);
+}
+
+.dark {
+  --texte-principal: oklch(0.95 0.01 95);
+  --texte-secondaire: oklch(0.72 0.02 95);
+  --surface-racine: oklch(0.14 0.02 95);
+  --surface-elevee: oklch(0.18 0.02 95);
+  --surface-mute: oklch(0.24 0.02 95);
+  --accent-principal: oklch(0.78 0.14 95);
+  --texte-sur-accent: oklch(0.14 0.02 95);
+  --bordure: oklch(0.28 0.02 95);
+  --anneau: oklch(0.72 0.12 95);
+  --danger: oklch(0.62 0.18 25);
+  --barre-laterale: oklch(0.1 0.02 95);
+  --barre-laterale-texte: oklch(0.9 0.01 95);
+  --barre-laterale-accent: oklch(0.78 0.14 95);
+  --ombre-douce: 0 24px 60px -24px oklch(0 0 0 / 0.55);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--surface-racine);
+  --color-foreground: var(--texte-principal);
+  --font-sans: var(--font-sans-app), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-app), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--surface-racine);
+  color: var(--texte-principal);
+  font-family: var(--font-sans);
+  background-image:
+    radial-gradient(900px 420px at 12% -8%, oklch(0.9 0.08 95 / 0.55), transparent 62%),
+    radial-gradient(700px 380px at 92% 0%, oklch(0.88 0.06 95 / 0.35), transparent 55%),
+    linear-gradient(180deg, oklch(0.99 0.01 95), oklch(0.97 0.015 95));
+  background-attachment: fixed;
+}
+
+.dark body {
+  background-image:
+    radial-gradient(800px 400px at 10% -10%, oklch(0.35 0.06 95 / 0.35), transparent 60%),
+    radial-gradient(600px 360px at 95% 5%, oklch(0.28 0.04 95 / 0.25), transparent 55%),
+    linear-gradient(180deg, oklch(0.14 0.02 95), oklch(0.12 0.02 95));
+}
+
+.puce-donnee {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: var(--rayon-sm);
+  border: 1px solid var(--bordure);
+  background: color-mix(in oklch, var(--surface-elevee) 88%, transparent);
+  padding: 0.2rem 0.55rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--texte-secondaire);
+}
+
+.surface-verre {
+  backdrop-filter: blur(14px);
+  background: color-mix(in oklch, var(--surface-elevee) 82%, transparent);
+  border: 1px solid color-mix(in oklch, var(--bordure) 70%, transparent);
+}
+
+.ligne-liste-luxe:hover {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--accent-principal) 12%, transparent),
+    transparent 70%
+  );
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.animate-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--accent-principal) 25%, transparent),
+    transparent
+  );
+  animation: shimmer 2.2s infinite;
+}
+
+@keyframes compteur-montee {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-compteur {
+  animation: compteur-montee 0.5s ease-out both;
 }
