@@ -8,8 +8,8 @@ const Entree = React.forwardRef<HTMLInputElement, EntreeProps>(({ className, typ
     <input
       type={type}
       className={cn(
-        "flex h-9 w-full rounded-[var(--rayon-md)] border border-[var(--bordure)] bg-[var(--surface-elevee)] px-3 py-1 text-sm text-[var(--texte-principal)] shadow-inner transition-colors",
-        "placeholder:text-[var(--texte-secondaire)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--anneau)]",
+        "flex h-10 w-full rounded-xl border border-[var(--bordure)]/60 bg-[var(--surface-elevee)] px-4 py-2 text-sm text-[var(--texte-principal)] transition-all duration-200",
+        "placeholder:text-[var(--texte-secondaire)]/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--anneau)] focus-visible:ring-offset-2 focus-visible:border-[var(--accent-principal)]/50",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}

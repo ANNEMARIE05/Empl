@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { CalendarCheck, Clock, FileStack, TrendingUp } from "lucide-react";
 import { NombreAnime } from "@/components/metrique/nombre-anime";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
 import { useConges } from "@/hooks/queries/use-conges";
@@ -22,7 +23,7 @@ import {
   YAxis,
 } from "recharts";
 
-const couleurAccent = "var(--accent-principal)";
+const couleurAccent = "#d4a500";
 
 export function TableauBordRh() {
   const { data: conges = [] } = useConges();
@@ -34,157 +35,208 @@ export function TableauBordRh() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
-        <Carte className="relative overflow-hidden">
-          <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[var(--accent-principal)]/20 blur-2xl" />
-          <CarteEntete>
-            <CarteTitre>Congés à traiter</CarteTitre>
-            <CarteDescription>Demandes en attente de validation RH.</CarteDescription>
-          </CarteEntete>
-          <CarteContenu>
-            <p className="text-4xl font-semibold tracking-tight">
-              <NombreAnime valeur={enAttenteConges} />
-            </p>
-          </CarteContenu>
-        </Carte>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="relative h-full overflow-hidden">
+            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-[var(--accent-principal)]/20 blur-2xl" />
+            <CarteEntete>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15">
+                  <CalendarCheck className="size-5 text-[var(--accent-principal)]" />
+                </div>
+                <div>
+                  <CarteTitre>Conges a traiter</CarteTitre>
+                  <CarteDescription>En attente</CarteDescription>
+                </div>
+              </div>
+            </CarteEntete>
+            <CarteContenu>
+              <p className="text-4xl font-bold text-[var(--accent-principal)]">
+                <NombreAnime valeur={enAttenteConges} />
+              </p>
+            </CarteContenu>
+          </Carte>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="h-full">
+            <CarteEntete>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/15">
+                  <FileStack className="size-5 text-blue-600" />
+                </div>
+                <div>
+                  <CarteTitre>Documents</CarteTitre>
+                  <CarteDescription>En traitement</CarteDescription>
+                </div>
+              </div>
+            </CarteEntete>
+            <CarteContenu>
+              <p className="text-4xl font-bold text-blue-600">
+                <NombreAnime valeur={enAttenteDocs} />
+              </p>
+            </CarteContenu>
+          </Carte>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="h-full">
+            <CarteEntete>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/15">
+                  <TrendingUp className="size-5 text-emerald-600" />
+                </div>
+                <div>
+                  <CarteTitre>Validation</CarteTitre>
+                  <CarteDescription>Taux global</CarteDescription>
+                </div>
+              </div>
+            </CarteEntete>
+            <CarteContenu>
+              <p className="text-4xl font-bold text-emerald-600">
+                <NombreAnime valeur={stats?.tauxValidationConges ?? 0} suffixe="%" />
+              </p>
+            </CarteContenu>
+          </Carte>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="h-full">
+            <CarteEntete>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/15">
+                  <Clock className="size-5 text-purple-600" />
+                </div>
+                <div>
+                  <CarteTitre>Delai moyen</CarteTitre>
+                  <CarteDescription>Traitement</CarteDescription>
+                </div>
+              </div>
+            </CarteEntete>
+            <CarteContenu>
+              <p className="text-4xl font-bold text-purple-600">
+                <NombreAnime valeur={stats?.delaiMoyenTraitementJours ?? 0} decimales={1} suffixe="j" />
+              </p>
+            </CarteContenu>
+          </Carte>
+        </motion.div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
         <Carte>
           <CarteEntete>
-            <CarteTitre>Documents en cours</CarteTitre>
-            <CarteDescription>Files administratives actives.</CarteDescription>
+            <CarteTitre>Activite mensuelle</CarteTitre>
+            <CarteDescription>Evolution des demandes de conges</CarteDescription>
           </CarteEntete>
-          <CarteContenu>
-            <p className="text-4xl font-semibold tracking-tight">
-              <NombreAnime valeur={enAttenteDocs} />
-            </p>
+          <CarteContenu className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={stats?.seriesMensuelles ?? []}>
+                <defs>
+                  <linearGradient id="gConges" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={couleurAccent} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={couleurAccent} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
+                <XAxis dataKey="mois" tick={{ fontSize: 11 }} stroke="#888" />
+                <YAxis hide />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "1px solid #e5e5e5",
+                    background: "#fff",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  }}
+                />
+                <Area type="monotone" dataKey="demandesConges" stroke={couleurAccent} strokeWidth={2} fill="url(#gConges)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </CarteContenu>
         </Carte>
+
         <Carte>
           <CarteEntete>
-            <CarteTitre>Taux de validation</CarteTitre>
-            <CarteDescription>Indicateur synthétique sur les congés.</CarteDescription>
+            <CarteTitre>Repartition des statuts</CarteTitre>
+            <CarteDescription>Conges et documents</CarteDescription>
           </CarteEntete>
-          <CarteContenu>
-            <p className="text-4xl font-semibold tracking-tight">
-              <NombreAnime valeur={stats?.tauxValidationConges ?? 0} suffixe="%" />
-            </p>
-            <p className="mt-2 text-xs text-[var(--texte-secondaire)]">
-              Délai moyen : <NombreAnime valeur={stats?.delaiMoyenTraitementJours ?? 0} decimales={1} /> j.
-            </p>
+          <CarteContenu className="grid gap-4 md:grid-cols-2">
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats?.repartitionStatutsConges ?? []}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
+                  <XAxis dataKey="nom" tick={{ fontSize: 10 }} stroke="#888" />
+                  <YAxis hide />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "1px solid #e5e5e5",
+                      background: "#fff",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    }}
+                  />
+                  <Bar dataKey="valeur" radius={[8, 8, 0, 0]}>
+                    {(stats?.repartitionStatutsConges ?? []).map((_, i) => (
+                      <Cell key={i} fill={i === 0 ? "#22c55e" : i === 1 ? couleurAccent : "#ef4444"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={stats?.repartitionTypesDocuments ?? []}
+                    dataKey="valeur"
+                    nameKey="nom"
+                    innerRadius={45}
+                    outerRadius={75}
+                    paddingAngle={4}
+                    cornerRadius={4}
+                  >
+                    {(stats?.repartitionTypesDocuments ?? []).map((_, i) => (
+                      <Cell key={i} fill={i === 0 ? couleurAccent : i === 1 ? "#64748b" : "#1e293b"} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "1px solid #e5e5e5",
+                      background: "#fff",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </CarteContenu>
         </Carte>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <Carte className="overflow-hidden p-0">
-          <div className="relative h-48 w-full">
+      <Carte className="overflow-hidden p-0">
+        <div className="grid md:grid-cols-2">
+          <div className="relative h-48 md:h-auto md:min-h-[180px]">
             <Image
               src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80"
               alt=""
               fill
               className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 55vw"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4 text-white">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-principal)]">
-                Culture RH
-              </p>
-              <p className="mt-1 text-lg font-semibold">Aligner les équipes sur les priorités humaines.</p>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent md:bg-gradient-to-r md:from-transparent md:to-[var(--surface-elevee)]" />
           </div>
-          <CarteContenu>
-            <p className="text-sm text-[var(--texte-secondaire)]">
-              Ce tableau de bord est volontairement distinct de celui des employés : indicateurs globaux, volumes et
-              alertes de traitement.
+          <div className="flex flex-col justify-center p-8">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--accent-principal)]/30 bg-[var(--accent-principal)]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-[var(--accent-principal)]">
+              <span className="size-1.5 rounded-full bg-[var(--accent-principal)]" />
+              Acces complet RH
+            </div>
+            <h3 className="mt-4 text-xl font-bold tracking-tight">Tableau de bord RH</h3>
+            <p className="mt-2 text-sm text-[var(--texte-secondaire)] leading-relaxed">
+              Vous disposez d&apos;un acces complet aux indicateurs, a la gestion des employes, des conges et des documents administratifs.
             </p>
-          </CarteContenu>
-        </Carte>
-
-        <motion.div layout className="grid gap-4">
-          <Carte>
-            <CarteEntete>
-              <CarteTitre>Activité mensuelle</CarteTitre>
-              <CarteDescription>Volume agrégé (données de démonstration).</CarteDescription>
-            </CarteEntete>
-            <CarteContenu className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stats?.seriesMensuelles ?? []}>
-                  <defs>
-                    <linearGradient id="gConges" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={couleurAccent} stopOpacity={0.35} />
-                      <stop offset="95%" stopColor={couleurAccent} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--bordure)" vertical={false} />
-                  <XAxis dataKey="mois" tick={{ fontSize: 10 }} stroke="var(--texte-secondaire)" />
-                  <YAxis hide />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "var(--rayon-md)",
-                      borderColor: "var(--bordure)",
-                      background: "var(--surface-elevee)",
-                    }}
-                  />
-                  <Area type="monotone" dataKey="demandesConges" stroke={couleurAccent} fill="url(#gConges)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CarteContenu>
-          </Carte>
-          <Carte>
-            <CarteEntete>
-              <CarteTitre>Répartition des statuts</CarteTitre>
-            </CarteEntete>
-            <CarteContenu className="grid gap-4 md:grid-cols-2">
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats?.repartitionStatutsConges ?? []}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--bordure)" vertical={false} />
-                    <XAxis dataKey="nom" tick={{ fontSize: 10 }} stroke="var(--texte-secondaire)" />
-                    <YAxis hide />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "var(--rayon-md)",
-                        borderColor: "var(--bordure)",
-                        background: "var(--surface-elevee)",
-                      }}
-                    />
-                    <Bar dataKey="valeur" radius={[4, 4, 0, 0]}>
-                      {(stats?.repartitionStatutsConges ?? []).map((_, i) => (
-                        <Cell key={i} fill={i === 0 ? "#22c55e" : i === 1 ? couleurAccent : "#ef4444"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={stats?.repartitionTypesDocuments ?? []}
-                      dataKey="valeur"
-                      nameKey="nom"
-                      innerRadius={40}
-                      outerRadius={70}
-                      paddingAngle={3}
-                    >
-                      {(stats?.repartitionTypesDocuments ?? []).map((_, i) => (
-                        <Cell key={i} fill={i === 0 ? couleurAccent : i === 1 ? "#94a3b8" : "#0f172a"} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "var(--rayon-md)",
-                        borderColor: "var(--bordure)",
-                        background: "var(--surface-elevee)",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CarteContenu>
-          </Carte>
-        </motion.div>
-      </div>
+          </div>
+        </div>
+      </Carte>
     </div>
   );
 }
