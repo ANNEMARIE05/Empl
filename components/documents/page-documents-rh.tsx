@@ -297,7 +297,7 @@ export function PageDocumentsRh() {
             </div>
           ) : modeVue === "grille" ? (
             /* Vue Grille */
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {documentsPagines.length === 0 ? (
                 <div className="col-span-full py-12 text-center text-[var(--texte-secondaire)]">
                   Aucune demande trouvee

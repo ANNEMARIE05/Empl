@@ -156,7 +156,7 @@ export function CoquilleApplication() {
       />
       <motion.main
         layout
-        className="min-h-screen px-2.5 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20"
+        className="min-h-screen px-2 pb-10 pt-14 sm:px-6 sm:pb-16 sm:pt-20"
         style={{ marginLeft: margeGauche }}
       >
         <AnimatePresence mode="wait">

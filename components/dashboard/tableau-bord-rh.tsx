@@ -10,6 +10,7 @@ import { NombreAnime } from "@/components/metrique/nombre-anime";
 import { Pastille } from "@/components/ui/badge";
 import { Bouton } from "@/components/ui/button";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
 import {
   Tableau,
   TableauCellule,
@@ -76,7 +77,7 @@ export function TableauBordRh() {
   const imageHero = banniereDashboardRh;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <div className="overflow-hidden rounded-xl border border-[var(--bordure)]/50 bg-gradient-to-r from-[var(--accent-principal)]/10 via-transparent to-[var(--accent-principal)]/5 dark:from-[var(--accent-principal)]/14 dark:via-transparent dark:to-[var(--accent-principal)]/6 sm:rounded-2xl">
         <div className="grid md:grid-cols-2">
           <div className="relative min-h-[160px] w-full sm:min-h-[200px] md:min-h-[240px]">
@@ -97,7 +98,7 @@ export function TableauBordRh() {
               <span className="size-1.5 rounded-full bg-[var(--accent-principal)]" />
               Ressources humaines
             </div>
-            <h2 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">
+            <h2 className="text-lg font-bold tracking-tight sm:text-2xl md:text-3xl">
               Bonjour {utilisateur.prenom}
             </h2>
             <p className="text-xs text-[var(--texte-secondaire)] leading-relaxed sm:text-sm">
@@ -108,27 +109,27 @@ export function TableauBordRh() {
         </div>
       </div>
 
-      <div className="flex flex-col flex-wrap gap-3 sm:gap-4 sm:flex-row sm:items-stretch">
+      <GrilleStatsKpi colonnes={4} className="max-md:max-w-full">
         <motion.div
-          className="min-w-0 sm:flex-1"
+          className="min-w-0"
           whileHover={{ y: -4 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
-          <Carte className="relative h-full overflow-hidden">
+          <Carte className="relative h-full min-w-0 overflow-hidden">
             <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-[var(--accent-principal)]/20 blur-2xl dark:bg-[var(--accent-principal)]/22" />
             <CarteEntete>
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15 dark:bg-[var(--accent-principal)]/18">
-                  <Users className="size-5 text-[var(--accent-principal)]" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-principal)]/15 sm:size-10 sm:rounded-xl dark:bg-[var(--accent-principal)]/18">
+                  <Users className="size-4 text-[var(--accent-principal)] sm:size-5" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <CarteTitre>Total employés</CarteTitre>
                   <CarteDescription>Effectif global</CarteDescription>
                 </div>
               </div>
             </CarteEntete>
             <CarteContenu>
-              <p className="text-3xl font-bold text-[var(--accent-principal)] sm:text-4xl">
+              <p className="text-xl font-bold text-[var(--accent-principal)] sm:text-4xl">
                 <NombreAnime valeur={totalEmployes} />
               </p>
             </CarteContenu>
@@ -136,24 +137,24 @@ export function TableauBordRh() {
         </motion.div>
 
         <motion.div
-          className="min-w-0 sm:flex-1"
+          className="min-w-0"
           whileHover={{ y: -4 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
-          <Carte className="h-full">
+          <Carte className="h-full min-w-0">
             <CarteEntete>
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/15 dark:bg-[var(--accent-principal)]/18">
-                  <Briefcase className="size-5 text-emerald-600 dark:text-[var(--accent-principal)]" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 sm:size-10 sm:rounded-xl dark:bg-[var(--accent-principal)]/18">
+                  <Briefcase className="size-4 text-emerald-600 sm:size-5 dark:text-[var(--accent-principal)]" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <CarteTitre>Departements</CarteTitre>
                   <CarteDescription>Services actifs</CarteDescription>
                 </div>
               </div>
             </CarteEntete>
             <CarteContenu>
-              <p className="text-3xl font-bold text-emerald-600 dark:text-[var(--accent-principal)] sm:text-4xl">
+              <p className="text-xl font-bold text-emerald-600 dark:text-[var(--accent-principal)] sm:text-4xl">
                 <NombreAnime valeur={departementsUniques} />
               </p>
             </CarteContenu>
@@ -161,25 +162,25 @@ export function TableauBordRh() {
         </motion.div>
 
         <motion.div
-          className="min-w-0 sm:flex-1"
+          className="min-w-0"
           whileHover={{ y: -4 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
-          <Carte className="relative h-full overflow-hidden">
+          <Carte className="relative h-full min-w-0 overflow-hidden">
             <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-[var(--accent-principal)]/20 blur-2xl dark:bg-[var(--accent-principal)]/22" />
             <CarteEntete>
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15 dark:bg-[var(--accent-principal)]/18">
-                  <CalendarCheck className="size-5 text-[var(--accent-principal)]" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-principal)]/15 sm:size-10 sm:rounded-xl dark:bg-[var(--accent-principal)]/18">
+                  <CalendarCheck className="size-4 text-[var(--accent-principal)] sm:size-5" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <CarteTitre>Conges a traiter</CarteTitre>
                   <CarteDescription>En attente</CarteDescription>
                 </div>
               </div>
             </CarteEntete>
             <CarteContenu>
-              <p className="text-3xl font-bold text-[var(--accent-principal)] sm:text-4xl">
+              <p className="text-xl font-bold text-[var(--accent-principal)] sm:text-4xl">
                 <NombreAnime valeur={enAttenteConges} />
               </p>
             </CarteContenu>
@@ -187,32 +188,32 @@ export function TableauBordRh() {
         </motion.div>
 
         <motion.div
-          className="min-w-0 sm:flex-1"
+          className="min-w-0"
           whileHover={{ y: -4 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
-          <Carte className="h-full">
+          <Carte className="h-full min-w-0">
             <CarteEntete>
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/15 dark:bg-[var(--accent-principal)]/18">
-                  <FileStack className="size-5 text-blue-600 dark:text-[var(--accent-principal)]" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/15 sm:size-10 sm:rounded-xl dark:bg-[var(--accent-principal)]/18">
+                  <FileStack className="size-4 text-blue-600 sm:size-5 dark:text-[var(--accent-principal)]" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <CarteTitre>Documents</CarteTitre>
                   <CarteDescription>En traitement</CarteDescription>
                 </div>
               </div>
             </CarteEntete>
             <CarteContenu>
-              <p className="text-3xl font-bold text-blue-600 dark:text-[var(--accent-principal)] sm:text-4xl">
+              <p className="text-xl font-bold text-blue-600 dark:text-[var(--accent-principal)] sm:text-4xl">
                 <NombreAnime valeur={enAttenteDocs} />
               </p>
             </CarteContenu>
           </Carte>
         </motion.div>
-      </div>
+      </GrilleStatsKpi>
 
-      <div className="grid gap-3 sm:gap-4 lg:gap-6 lg:grid-cols-2">
+      <div className="grid gap-2 sm:gap-4 lg:gap-6 lg:grid-cols-2">
         <Carte>
           <CarteEntete>
             <CarteTitre>Activite mensuelle</CarteTitre>
@@ -254,7 +255,7 @@ export function TableauBordRh() {
             <CarteTitre>Repartition des statuts</CarteTitre>
             <CarteDescription>Conges et documents</CarteDescription>
           </CarteEntete>
-          <CarteContenu className="grid gap-4 md:grid-cols-2">
+          <CarteContenu className="grid gap-2.5 sm:gap-4 md:grid-cols-2">
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats?.repartitionStatutsConges ?? []}>

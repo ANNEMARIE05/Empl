@@ -102,7 +102,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Etiquette htmlFor="prenom">Prenom</Etiquette>
           <Entree
@@ -135,7 +135,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
           required
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Etiquette htmlFor="role">Role</Etiquette>
           <FiltreSelect
@@ -159,7 +159,7 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
           />
         </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Etiquette htmlFor="poste">Poste</Etiquette>
           <Entree
@@ -219,7 +219,7 @@ function DetailEmploye({ employe, onFermer }: DetailEmployeProps) {
   }, [congesEmploye, pageConges]);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <div className="flex items-center gap-4">
         <div className="relative size-20 overflow-hidden rounded-2xl border border-[var(--bordure)] bg-[var(--surface-mute)]">
           <Image
@@ -240,7 +240,7 @@ function DetailEmploye({ employe, onFermer }: DetailEmployeProps) {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
         <div className="flex items-center gap-3 rounded-xl border border-[var(--bordure)]/60 bg-[var(--surface-mute)] p-3">
           <Mail className="size-5 text-[var(--accent-principal)]" />
           <div>
@@ -437,7 +437,7 @@ export function ListeEmployes() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
@@ -576,7 +576,7 @@ export function ListeEmployes() {
               </TableauCorps>
             </Tableau>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {donneesPaginees.map((e) => (
                 <div
                   key={e.id}

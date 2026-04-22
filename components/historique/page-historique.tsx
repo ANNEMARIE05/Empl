@@ -129,7 +129,7 @@ export function PageHistorique() {
   if (!utilisateur) return null;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <div className="flex items-center gap-4">
         <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
           <History className="size-6 text-[var(--accent-principal)]" />

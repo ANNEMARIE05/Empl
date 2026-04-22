@@ -2,6 +2,7 @@
 
 import { NombreAnime } from "@/components/metrique/nombre-anime";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
 import { Squelette } from "@/components/ui/skeleton";
 import { useStatistiques } from "@/hooks/queries/use-statistiques";
 import {
@@ -37,10 +38,11 @@ export function PanneauStatistiques() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-2.5 sm:gap-4 md:grid-cols-3">
-        <Squelette className="h-28" />
-        <Squelette className="h-28" />
-        <Squelette className="h-28" />
+      <div className="grid grid-cols-2 gap-1.5 sm:gap-4 md:grid-cols-4">
+        <Squelette className="h-24 sm:h-28" />
+        <Squelette className="h-24 sm:h-28" />
+        <Squelette className="h-24 sm:h-28" />
+        <Squelette className="h-24 sm:h-28" />
       </div>
     );
   }
@@ -50,54 +52,54 @@ export function PanneauStatistiques() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="grid gap-2.5 sm:gap-4 md:grid-cols-4">
-        <Carte>
+    <div className="space-y-3 sm:space-y-6">
+      <GrilleStatsKpi colonnes={4}>
+        <Carte className="min-w-0">
           <CarteEntete>
             <CarteTitre>Employés suivis</CarteTitre>
             <CarteDescription>Périmètre de votre vue.</CarteDescription>
           </CarteEntete>
           <CarteContenu>
-            <p className="text-2xl font-semibold sm:text-3xl">
+            <p className="text-lg font-semibold tabular-nums sm:text-3xl">
               <NombreAnime valeur={data.volumeEmployesActifs} />
             </p>
           </CarteContenu>
         </Carte>
-        <Carte>
+        <Carte className="min-w-0">
           <CarteEntete>
             <CarteTitre>Taux validation congés</CarteTitre>
           </CarteEntete>
           <CarteContenu>
-            <p className="text-2xl font-semibold sm:text-3xl">
+            <p className="text-lg font-semibold tabular-nums sm:text-3xl">
               <NombreAnime valeur={data.tauxValidationConges} suffixe="%" />
             </p>
           </CarteContenu>
         </Carte>
-        <Carte>
+        <Carte className="min-w-0">
           <CarteEntete>
             <CarteTitre>Délai moyen</CarteTitre>
           </CarteEntete>
           <CarteContenu>
-            <p className="text-2xl font-semibold sm:text-3xl">
+            <p className="text-lg font-semibold tabular-nums sm:text-3xl">
               <NombreAnime valeur={data.delaiMoyenTraitementJours} decimales={1} suffixe=" j" />
             </p>
           </CarteContenu>
         </Carte>
-        <Carte>
+        <Carte className="min-w-0">
           <CarteEntete>
             <CarteTitre>Charge documents</CarteTitre>
           </CarteEntete>
           <CarteContenu>
-            <p className="text-2xl font-semibold sm:text-3xl">
+            <p className="text-lg font-semibold tabular-nums sm:text-3xl">
               <NombreAnime
                 valeur={data.seriesMensuelles.reduce((a, b) => a + b.demandesDocuments, 0)}
               />
             </p>
           </CarteContenu>
         </Carte>
-      </div>
+      </GrilleStatsKpi>
 
-      <div className="grid gap-2.5 sm:gap-4 xl:grid-cols-2">
+      <div className="grid gap-2 sm:gap-4 xl:grid-cols-2">
         <Carte>
           <CarteEntete>
             <CarteTitre>Flux congés / documents</CarteTitre>

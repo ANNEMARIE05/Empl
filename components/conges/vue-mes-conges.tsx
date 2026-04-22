@@ -8,6 +8,7 @@ import { CalendrierConges } from "@/components/conges/calendrier-conges";
 import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libelles-conges";
 import { Bouton } from "@/components/ui/button";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
 import {
   Dialogue,
   ContenuDialogue,
@@ -153,7 +154,7 @@ export function VueMesConges({ impulsionFormulaire = 0 }: { impulsionFormulaire?
   }, [jourFiltreCalendrier]);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Header with action button */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
@@ -174,43 +175,46 @@ export function VueMesConges({ impulsionFormulaire = 0 }: { impulsionFormulaire?
       </div>
 
       <div className="flex min-h-0 flex-col gap-4">
-        <div className="grid shrink-0 grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="flex items-center gap-3 rounded-2xl border border-[var(--bordure)]/50 bg-[var(--surface-elevee)] px-4 py-3 shadow-sm">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/12">
-              <Clock className="size-5 text-amber-600 dark:text-amber-500" />
+        <GrilleStatsKpi colonnes={3} className="shrink-0">
+          <div className="flex flex-col items-center gap-0.5 rounded-lg border border-[var(--bordure)]/50 bg-[var(--surface-elevee)] px-1.5 py-2 shadow-sm sm:flex-row sm:items-center sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-amber-500/12 sm:size-10 sm:rounded-lg">
+              <Clock className="size-4 text-amber-600 dark:text-amber-500 sm:size-5" />
             </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold tabular-nums text-[var(--texte-principal)]">
+            <div className="min-w-0 text-center sm:text-left">
+              <p className="text-base font-bold tabular-nums text-[var(--texte-principal)] sm:text-2xl">
                 <NombreAnime valeur={statsResume.enAttente} />
               </p>
-              <p className="text-xs text-[var(--texte-secondaire)]">En attente de traitement</p>
+              <p className="text-[10px] font-medium leading-tight text-[var(--texte-secondaire)] sm:text-xs">
+                <span className="max-sm:line-clamp-2 sm:hidden">En attente</span>
+                <span className="hidden sm:inline">En attente de traitement</span>
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-[var(--bordure)]/50 bg-[var(--surface-elevee)] px-4 py-3 shadow-sm">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/12">
-              <CheckCircle className="size-5 text-emerald-600 dark:text-emerald-500" />
+          <div className="flex flex-col items-center gap-0.5 rounded-lg border border-[var(--bordure)]/50 bg-[var(--surface-elevee)] px-1.5 py-2 shadow-sm sm:flex-row sm:items-center sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-emerald-500/12 sm:size-10 sm:rounded-lg">
+              <CheckCircle className="size-4 text-emerald-600 dark:text-emerald-500 sm:size-5" />
             </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold tabular-nums text-[var(--texte-principal)]">
+            <div className="min-w-0 text-center sm:text-left">
+              <p className="text-base font-bold tabular-nums text-[var(--texte-principal)] sm:text-2xl">
                 <NombreAnime valeur={statsResume.validees} />
               </p>
-              <p className="text-xs text-[var(--texte-secondaire)]">Demandes validees</p>
+              <p className="text-[10px] font-medium text-[var(--texte-secondaire)] sm:text-xs">Validees</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-[var(--bordure)]/50 bg-[var(--surface-elevee)] px-4 py-3 shadow-sm">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-red-500/12">
-              <X className="size-5 text-red-600 dark:text-red-500" />
+          <div className="flex flex-col items-center gap-0.5 rounded-lg border border-[var(--bordure)]/50 bg-[var(--surface-elevee)] px-1.5 py-2 shadow-sm sm:flex-row sm:items-center sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-red-500/12 sm:size-10 sm:rounded-lg">
+              <X className="size-4 text-red-600 dark:text-red-500 sm:size-5" />
             </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold tabular-nums text-[var(--texte-principal)]">
+            <div className="min-w-0 text-center sm:text-left">
+              <p className="text-base font-bold tabular-nums text-[var(--texte-principal)] sm:text-2xl">
                 <NombreAnime valeur={statsResume.refusees} />
               </p>
-              <p className="text-xs text-[var(--texte-secondaire)]">Demandes refusees</p>
+              <p className="text-[10px] font-medium text-[var(--texte-secondaire)] sm:text-xs">Refusees</p>
             </div>
           </div>
-        </div>
+        </GrilleStatsKpi>
 
-        <div className="flex min-h-0 flex-col gap-3 sm:gap-4 xl:gap-6 xl:min-h-[min(32rem,70vh)] xl:flex-row xl:items-stretch">
+        <div className="flex min-h-0 flex-col gap-2 sm:gap-4 xl:gap-6 xl:min-h-[min(32rem,70vh)] xl:flex-row xl:items-stretch">
         <div
           ref={refSectionTableau}
           className="flex min-h-0 min-w-0 flex-1 flex-col scroll-mt-20"
@@ -341,7 +345,7 @@ export function VueMesConges({ impulsionFormulaire = 0 }: { impulsionFormulaire?
               <TitreDialogue>Nouvelle demande de conges</TitreDialogue>
             </div>
           </EnteteDialogue>
-          <div className="grid gap-4 pt-2">
+          <div className="grid gap-2.5 sm:gap-4 pt-1.5 sm:pt-2">
             <div className="space-y-2">
               <Etiquette>Type de conge</Etiquette>
               <select
@@ -356,7 +360,7 @@ export function VueMesConges({ impulsionFormulaire = 0 }: { impulsionFormulaire?
                 ))}
               </select>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Etiquette>Date de debut</Etiquette>
                 <Entree type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />

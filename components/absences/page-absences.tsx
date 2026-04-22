@@ -29,6 +29,7 @@ import { BarreRecherche } from "@/components/ui/barre-recherche";
 import { FiltreSelect } from "@/components/ui/filtre-select";
 import { Pagination } from "@/components/ui/pagination";
 import { NombreAnime } from "@/components/metrique/nombre-anime";
+import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
 import { magasinApplication } from "@/stores/magasin-application";
 import { cn } from "@/lib/utils";
 import {
@@ -168,14 +169,14 @@ export function PageAbsences({ impulsionFormulaire = 0 }: { impulsionFormulaire?
   }, [impulsionFormulaire]);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-3 sm:space-y-6">
+      <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5 sm:gap-4">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15 sm:size-12 sm:rounded-2xl">
             <CalendarOff className="size-5 text-[var(--accent-principal)] sm:size-6" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-lg font-bold tracking-tight sm:text-xl">
+            <h2 className="text-base font-bold tracking-tight sm:text-xl">
               {vueTouteEntreprise ? "Absences" : "Mes absences"}
             </h2>
             <p className="text-xs text-[var(--texte-secondaire)] sm:text-sm">
@@ -193,72 +194,88 @@ export function PageAbsences({ impulsionFormulaire = 0 }: { impulsionFormulaire?
         )}
       </div>
 
-      {/* Stats cards */}
-      <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-          <Carte className="h-full">
-            <CarteContenu className="flex items-center gap-3 py-3 sm:gap-4 sm:py-4">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-principal)]/15 sm:size-12 sm:rounded-xl">
-                <CalendarOff className="size-5 text-[var(--accent-principal)] sm:size-6" />
+      {/* Stats cards : 2×2 sur mobile, 2 colonnes sm–md, 4 colonnes large */}
+      <GrilleStatsKpi colonnes={4}>
+        <motion.div
+          className="min-w-0"
+          whileHover={{ y: -2 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        >
+          <Carte className="h-full min-w-0">
+            <CarteContenu className="flex flex-col items-center gap-1 py-2 text-center sm:flex-row sm:items-center sm:gap-2.5 sm:py-2.5 sm:text-left md:gap-4 md:py-4">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-[var(--accent-principal)]/15 sm:size-10 sm:rounded-lg md:size-12 md:rounded-xl">
+                <CalendarOff className="size-4 text-[var(--accent-principal)] sm:size-5 md:size-6" />
               </div>
-              <div>
-                <p className="text-xl font-bold text-[var(--accent-principal)] sm:text-2xl">
+              <div className="min-w-0">
+                <p className="text-base font-bold tabular-nums text-[var(--accent-principal)] sm:text-lg md:text-2xl">
                   <NombreAnime valeur={stats.total} />
                 </p>
-                <p className="text-xs text-[var(--texte-secondaire)] sm:text-sm">Total absences</p>
+                <p className="text-[10px] text-[var(--texte-secondaire)] sm:text-xs md:text-sm">Total</p>
               </div>
             </CarteContenu>
           </Carte>
         </motion.div>
 
-        <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-          <Carte className="h-full">
-            <CarteContenu className="flex items-center gap-3 py-3 sm:gap-4 sm:py-4">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 sm:size-12 sm:rounded-xl">
-                <AlertCircle className="size-5 text-amber-600 sm:size-6" />
+        <motion.div
+          className="min-w-0"
+          whileHover={{ y: -2 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        >
+          <Carte className="h-full min-w-0">
+            <CarteContenu className="flex flex-col items-center gap-1 py-2 text-center sm:flex-row sm:items-center sm:gap-2.5 sm:py-2.5 sm:text-left md:gap-4 md:py-4">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-amber-500/15 sm:size-10 sm:rounded-lg md:size-12 md:rounded-xl">
+                <AlertCircle className="size-4 text-amber-600 sm:size-5 md:size-6" />
               </div>
-              <div>
-                <p className="text-xl font-bold text-amber-600 sm:text-2xl">
+              <div className="min-w-0">
+                <p className="text-base font-bold tabular-nums text-amber-600 sm:text-lg md:text-2xl">
                   <NombreAnime valeur={stats.enAttente} />
                 </p>
-                <p className="text-xs text-[var(--texte-secondaire)] sm:text-sm">En attente</p>
+                <p className="text-[10px] text-[var(--texte-secondaire)] sm:text-xs md:text-sm">En attente</p>
               </div>
             </CarteContenu>
           </Carte>
         </motion.div>
 
-        <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-          <Carte className="h-full">
-            <CarteContenu className="flex items-center gap-3 py-3 sm:gap-4 sm:py-4">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 sm:size-12 sm:rounded-xl">
-                <CheckCircle className="size-5 text-emerald-600 sm:size-6" />
+        <motion.div
+          className="min-w-0"
+          whileHover={{ y: -2 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        >
+          <Carte className="h-full min-w-0">
+            <CarteContenu className="flex flex-col items-center gap-1 py-2 text-center sm:flex-row sm:items-center sm:gap-2.5 sm:py-2.5 sm:text-left md:gap-4 md:py-4">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 sm:size-10 sm:rounded-lg md:size-12 md:rounded-xl">
+                <CheckCircle className="size-4 text-emerald-600 sm:size-5 md:size-6" />
               </div>
-              <div>
-                <p className="text-xl font-bold text-emerald-600 sm:text-2xl">
+              <div className="min-w-0">
+                <p className="text-base font-bold tabular-nums text-emerald-600 sm:text-lg md:text-2xl">
                   <NombreAnime valeur={stats.justifies} />
                 </p>
-                <p className="text-xs text-[var(--texte-secondaire)] sm:text-sm">Justifiées</p>
+                <p className="text-[10px] text-[var(--texte-secondaire)] sm:text-xs md:text-sm">Justifiées</p>
               </div>
             </CarteContenu>
           </Carte>
         </motion.div>
 
-        <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-          <Carte className="h-full">
-            <CarteContenu className="flex items-center gap-3 py-3 sm:gap-4 sm:py-4">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[var(--danger)]/15 sm:size-12 sm:rounded-xl">
-                <Ban className="size-5 text-[var(--danger)] sm:size-6" />
+        <motion.div
+          className="min-w-0"
+          whileHover={{ y: -2 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        >
+          <Carte className="h-full min-w-0">
+            <CarteContenu className="flex flex-col items-center gap-1 py-2 text-center sm:flex-row sm:items-center sm:gap-2.5 sm:py-2.5 sm:text-left md:gap-4 md:py-4">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-[var(--danger)]/15 sm:size-10 sm:rounded-lg md:size-12 md:rounded-xl">
+                <Ban className="size-4 text-[var(--danger)] sm:size-5 md:size-6" />
               </div>
-              <div>
-                <p className="text-xl font-bold text-[var(--danger)] sm:text-2xl">
+              <div className="min-w-0">
+                <p className="text-base font-bold tabular-nums text-[var(--danger)] sm:text-lg md:text-2xl">
                   <NombreAnime valeur={stats.refus} />
                 </p>
-                <p className="text-xs text-[var(--texte-secondaire)] sm:text-sm">Refusées</p>
+                <p className="text-[10px] text-[var(--texte-secondaire)] sm:text-xs md:text-sm">Refusées</p>
               </div>
             </CarteContenu>
           </Carte>
         </motion.div>
-      </div>
+      </GrilleStatsKpi>
 
       <Carte>
         <CarteEntete>
@@ -435,7 +452,7 @@ export function PageAbsences({ impulsionFormulaire = 0 }: { impulsionFormulaire?
                 <TitreDialogue>Demande d&apos;absence</TitreDialogue>
               </div>
             </EnteteDialogue>
-            <div className="grid gap-4 pt-2">
+            <div className="grid gap-2.5 sm:gap-4 pt-1.5 sm:pt-2">
               <div className="space-y-2">
                 <Etiquette htmlFor="demande-absence-motif">Motif de la demande</Etiquette>
                 <ZoneTexte
@@ -446,7 +463,7 @@ export function PageAbsences({ impulsionFormulaire = 0 }: { impulsionFormulaire?
                   rows={4}
                 />
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Etiquette>Date de debut</Etiquette>
                   <Entree type="date" value={dateDu} onChange={(e) => setDateDu(e.target.value)} />

@@ -89,7 +89,7 @@ export function VueParametres() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
@@ -133,7 +133,7 @@ export function VueParametres() {
         >
           {/* Onglet Profil */}
           {ongletActif === "profil" && (
-            <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-3 sm:space-y-6">
               <Carte>
                 <CarteEntete>
                   <div className="flex items-center gap-3">
@@ -147,7 +147,7 @@ export function VueParametres() {
                   </div>
                 </CarteEntete>
                 <CarteContenu className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Etiquette htmlFor="prenom">Prenom</Etiquette>
                       <Entree
@@ -217,7 +217,7 @@ export function VueParametres() {
 
           {/* Onglet Securite */}
           {ongletActif === "securite" && (
-            <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-3 sm:space-y-6">
               {/* Mot de passe */}
               <Carte>
                 <CarteEntete>
@@ -253,7 +253,7 @@ export function VueParametres() {
                       </button>
                     </div>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Etiquette htmlFor="nouveauMotDePasse">Nouveau mot de passe</Etiquette>
                       <Entree

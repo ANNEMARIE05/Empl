@@ -127,7 +127,7 @@ export function VueMesDocuments({ impulsionFormulaire = 0 }: { impulsionFormulai
   }, [impulsionFormulaire]);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Header with action button */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
@@ -154,7 +154,7 @@ export function VueMesDocuments({ impulsionFormulaire = 0 }: { impulsionFormulai
         </CarteEntete>
         <CarteContenu className="space-y-4">
           {/* Filters */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <BarreRecherche
               valeur={recherche}
               onChangerValeur={handleRecherche}
@@ -265,7 +265,7 @@ export function VueMesDocuments({ impulsionFormulaire = 0 }: { impulsionFormulai
               <TitreDialogue>Nouvelle demande de document</TitreDialogue>
             </div>
           </EnteteDialogue>
-          <div className="grid gap-4 pt-2">
+          <div className="grid gap-2.5 sm:gap-4 pt-1.5 sm:pt-2">
             <div className="space-y-2">
               <Etiquette>Type de document</Etiquette>
               <select

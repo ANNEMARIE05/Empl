@@ -98,7 +98,7 @@ export function EnteteApplication({
             key={ongletActif}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="truncate text-base font-bold tracking-tight sm:text-lg"
+            className="truncate text-sm font-bold tracking-tight sm:text-base lg:text-lg"
           >
             {entete.titre}
           </motion.h1>

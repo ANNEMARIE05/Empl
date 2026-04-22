@@ -332,7 +332,7 @@ export function VueParametrage() {
                       <X className="size-4" />
                     </Bouton>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
                       <Etiquette>Code</Etiquette>
                       <input
@@ -388,7 +388,7 @@ export function VueParametrage() {
                 >
                   {modeEdition === type.id ? (
                     <div className="space-y-4">
-                      <div className="grid gap-4 sm:grid-cols-3">
+                      <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-3">
                         <div className="space-y-2">
                           <Etiquette>Code</Etiquette>
                           <input
@@ -505,7 +505,7 @@ export function VueParametrage() {
                       <X className="size-4" />
                     </Bouton>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Etiquette>Code</Etiquette>
                       <input
@@ -571,7 +571,7 @@ export function VueParametrage() {
                 >
                   {modeEdition === role.id ? (
                     <div className="space-y-4">
-                      <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Etiquette>Code</Etiquette>
                           <input
@@ -706,7 +706,7 @@ export function VueParametrage() {
                       <X className="size-4" />
                     </Bouton>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Etiquette>Code</Etiquette>
                       <input
@@ -845,7 +845,7 @@ export function VueParametrage() {
                       <X className="size-4" />
                     </Bouton>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Etiquette>Code</Etiquette>
                       <input
@@ -913,7 +913,7 @@ export function VueParametrage() {
                 >
                   {modeEdition === type.id ? (
                     <div className="space-y-4">
-                      <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Etiquette>Code</Etiquette>
                           <input
@@ -1049,7 +1049,7 @@ export function VueParametrage() {
                       <X className="size-4" />
                     </Bouton>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Etiquette>Nom</Etiquette>
                       <input
@@ -1117,7 +1117,7 @@ export function VueParametrage() {
                 >
                   {modeEdition === regle.id ? (
                     <div className="space-y-4">
-                      <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Etiquette>Nom</Etiquette>
                           <input
@@ -1227,7 +1227,7 @@ export function VueParametrage() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <Carte>
         <CarteEntete>
           <div className="flex items-center gap-3">
@@ -1244,7 +1244,7 @@ export function VueParametrage() {
         </CarteEntete>
       </Carte>
 
-      <div className="grid gap-3 sm:gap-4 lg:gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-2 sm:gap-4 lg:gap-6 lg:grid-cols-[280px_1fr]">
         {/* Navigation laterale */}
         <div className="space-y-2">
           {onglets.map((onglet) => (

@@ -17,6 +17,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
 import { Pastille } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NombreAnime } from "@/components/metrique/nombre-anime";
@@ -68,19 +69,19 @@ export function VueMonProfil() {
   const estManager = utilisateur.role === "manager";
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Profile Header Card */}
       <Carte className="overflow-hidden">
         <div className="relative">
           {/* Banner */}
-          <div className="h-32 bg-gradient-to-r from-[var(--accent-principal)] via-[var(--accent-principal)]/80 to-[var(--accent-principal)]/60" />
+            <div className="h-24 sm:h-32 bg-gradient-to-r from-[var(--accent-principal)] via-[var(--accent-principal)]/80 to-[var(--accent-principal)]/60" />
           
           {/* Profile Info */}
-          <div className="relative px-6 pb-6">
-            <div className="flex flex-col items-center sm:flex-row sm:items-end gap-4 -mt-12 sm:-mt-10">
+          <div className="relative px-4 pb-4 sm:px-6 sm:pb-6">
+            <div className="flex flex-col items-center sm:flex-row sm:items-end gap-3 -mt-10 sm:-mt-10 sm:gap-4">
               {/* Avatar */}
               <div className="relative">
-                <Avatar className="size-24 sm:size-28 ring-4 ring-[var(--surface-elevee)] shadow-xl">
+                <Avatar className="size-20 sm:size-28 ring-4 ring-[var(--surface-elevee)] shadow-xl">
                   {utilisateur.photoUrl ? (
                     <AvatarImage src={utilisateur.photoUrl} alt="" />
                   ) : null}
@@ -95,7 +96,7 @@ export function VueMonProfil() {
 
               {/* Name and Role */}
               <div className="flex-1 text-center sm:text-left sm:pb-2">
-                <h1 className="text-2xl font-bold tracking-tight">
+                <h1 className="text-lg font-bold tracking-tight sm:text-2xl">
                   {utilisateur.prenom} {utilisateur.nom}
                 </h1>
                 <p className="text-[var(--texte-secondaire)]">{utilisateur.poste}</p>
@@ -118,42 +119,42 @@ export function VueMonProfil() {
       </Carte>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-          <Carte className="h-full border-l-4 border-l-[var(--accent-principal)]">
-            <CarteContenu className="flex items-center gap-4 py-4">
-              <div className="flex size-12 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15">
-                <CalendarDays className="size-6 text-[var(--accent-principal)]" />
+      <GrilleStatsKpi colonnes={2} className="max-w-full">
+        <motion.div className="min-w-0" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="h-full min-w-0 border-l-4 border-l-[var(--accent-principal)]">
+            <CarteContenu className="flex items-center gap-2 py-2.5 sm:gap-4 sm:py-4">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-principal)]/15 sm:size-12 sm:rounded-xl">
+                <CalendarDays className="size-4 text-[var(--accent-principal)] sm:size-6" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-[var(--accent-principal)]">
+              <div className="min-w-0">
+                <p className="text-lg font-bold text-[var(--accent-principal)] sm:text-2xl">
                   <NombreAnime valeur={stats.totalConges} />
                 </p>
-                <p className="text-sm text-[var(--texte-secondaire)]">Demandes conges</p>
+                <p className="text-[10px] text-[var(--texte-secondaire)] sm:text-sm">Demandes conges</p>
               </div>
             </CarteContenu>
           </Carte>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
-          <Carte className="h-full border-l-4 border-l-emerald-500">
-            <CarteContenu className="flex items-center gap-4 py-4">
-              <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/15">
-                <CheckCircle className="size-6 text-emerald-600" />
+        <motion.div className="min-w-0" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 25 }}>
+          <Carte className="h-full min-w-0 border-l-4 border-l-emerald-500">
+            <CarteContenu className="flex items-center gap-2 py-2.5 sm:gap-4 sm:py-4">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 sm:size-12 sm:rounded-xl">
+                <CheckCircle className="size-4 text-emerald-600 sm:size-6" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-emerald-600">
+              <div className="min-w-0">
+                <p className="text-lg font-bold text-emerald-600 sm:text-2xl">
                   <NombreAnime valeur={stats.congesValides} />
                 </p>
-                <p className="text-sm text-[var(--texte-secondaire)]">Conges valides</p>
+                <p className="text-[10px] text-[var(--texte-secondaire)] sm:text-sm">Conges valides</p>
               </div>
             </CarteContenu>
           </Carte>
         </motion.div>
-      </div>
+      </GrilleStatsKpi>
 
       {/* Info Cards Grid */}
-      <div className="grid gap-3 sm:gap-4 lg:gap-6 lg:grid-cols-2">
+      <div className="grid gap-2 sm:gap-4 lg:gap-6 lg:grid-cols-2">
         {/* Personal Information */}
         <Carte>
           <CarteEntete>
@@ -294,7 +295,7 @@ export function VueMonProfil() {
             </div>
           </CarteEntete>
           <CarteContenu>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div className="flex items-start gap-3 rounded-lg bg-[var(--surface-mute)] p-3">
                 <CheckCircle className="size-5 text-emerald-500 flex-shrink-0 mt-0.5" />
                 <p className="text-sm">Validation des demandes de votre equipe</p>

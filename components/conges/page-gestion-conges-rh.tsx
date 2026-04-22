@@ -23,6 +23,7 @@ import { CalendrierConges } from "@/components/conges/calendrier-conges";
 import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libelles-conges";
 import { Bouton } from "@/components/ui/button";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
 import { Etiquette } from "@/components/ui/label";
 import { Pastille, type PastilleProps } from "@/components/ui/badge";
 import { Squelette } from "@/components/ui/skeleton";
@@ -205,24 +206,24 @@ export function PageGestionCongesRh() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col gap-3 sm:gap-4 xl:gap-6 xl:flex-row xl:items-stretch">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 sm:gap-4">
-          <div className="grid shrink-0 grid-cols-1 gap-2.5 sm:gap-4 sm:grid-cols-3">
+    <div className="space-y-3 sm:space-y-6">
+      <div className="flex flex-col gap-2 sm:gap-4 xl:gap-6 xl:flex-row xl:items-stretch">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 sm:gap-4">
+          <GrilleStatsKpi colonnes={3} className="shrink-0">
             <motion.div
               className="min-h-0"
               whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
-              <Carte className="relative flex h-full min-h-[6rem] overflow-hidden border-l-2 border-l-[var(--accent-principal)] sm:min-h-[7.25rem]">
+              <Carte className="relative flex h-full min-h-0 overflow-hidden border-l-2 border-l-[var(--accent-principal)] sm:min-h-[7.25rem]">
                 <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-[var(--accent-principal)]/12 blur-2xl" />
-                <CarteContenu className="flex flex-1 items-center gap-3 p-3 sm:gap-4 sm:p-4">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15 sm:size-12 sm:rounded-2xl">
-                    <Clock className="size-5 text-[var(--accent-principal)] sm:size-6" />
+                <CarteContenu className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 p-2 text-center sm:flex-row sm:gap-4 sm:p-4 sm:text-left">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-principal)]/15 sm:size-12 sm:rounded-2xl">
+                    <Clock className="size-4 text-[var(--accent-principal)] sm:size-6" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-[var(--texte-secondaire)] sm:text-sm">En attente</p>
-                    <p className="text-xl font-bold tabular-nums text-[var(--accent-principal)] sm:text-2xl md:text-3xl">
+                  <div className="flex min-w-0 flex-1 flex-col-reverse items-center gap-0.5 sm:flex-col sm:items-start sm:gap-0 sm:pt-0">
+                    <p className="text-[10px] font-medium text-[var(--texte-secondaire)] sm:text-sm">En attente</p>
+                    <p className="text-base font-bold tabular-nums text-[var(--accent-principal)] sm:text-2xl md:text-3xl">
                       <NombreAnime valeur={statsConges.enAttente} />
                     </p>
                   </div>
@@ -235,15 +236,15 @@ export function PageGestionCongesRh() {
               whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
-              <Carte className="relative flex h-full min-h-[6rem] overflow-hidden border-l-2 border-l-emerald-500 sm:min-h-[7.25rem]">
+              <Carte className="relative flex h-full min-h-0 overflow-hidden border-l-2 border-l-emerald-500 sm:min-h-[7.25rem]">
                 <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-emerald-500/12 blur-2xl" />
-                <CarteContenu className="flex flex-1 items-center gap-3 p-3 sm:gap-4 sm:p-4">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 sm:size-12 sm:rounded-2xl">
-                    <CalendarCheck className="size-5 text-emerald-600 sm:size-6" />
+                <CarteContenu className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 p-2 text-center sm:flex-row sm:gap-4 sm:p-4 sm:text-left">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 sm:size-12 sm:rounded-2xl">
+                    <CalendarCheck className="size-4 text-emerald-600 sm:size-6" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-[var(--texte-secondaire)] sm:text-sm">Valides</p>
-                    <p className="text-xl font-bold tabular-nums text-emerald-600 sm:text-2xl md:text-3xl">
+                  <div className="flex min-w-0 flex-1 flex-col-reverse items-center gap-0.5 sm:flex-col sm:items-start sm:gap-0 sm:pt-0">
+                    <p className="text-[10px] font-medium text-[var(--texte-secondaire)] sm:text-sm">Valides</p>
+                    <p className="text-base font-bold tabular-nums text-emerald-600 sm:text-2xl md:text-3xl">
                       <NombreAnime valeur={statsConges.valides} />
                     </p>
                   </div>
@@ -256,22 +257,22 @@ export function PageGestionCongesRh() {
               whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
-              <Carte className="relative flex h-full min-h-[6rem] overflow-hidden border-l-2 border-l-red-500 sm:min-h-[7.25rem]">
+              <Carte className="relative flex h-full min-h-0 overflow-hidden border-l-2 border-l-red-500 sm:min-h-[7.25rem]">
                 <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-red-500/12 blur-2xl" />
-                <CarteContenu className="flex flex-1 items-center gap-3 p-3 sm:gap-4 sm:p-4">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500/15 sm:size-12 sm:rounded-2xl">
-                    <X className="size-5 text-red-600 sm:size-6" />
+                <CarteContenu className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 p-2 text-center sm:flex-row sm:gap-4 sm:p-4 sm:text-left">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-red-500/15 sm:size-12 sm:rounded-2xl">
+                    <X className="size-4 text-red-600 sm:size-6" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-[var(--texte-secondaire)] sm:text-sm">Refusés</p>
-                    <p className="text-xl font-bold tabular-nums text-red-600 sm:text-2xl md:text-3xl">
+                  <div className="flex min-w-0 flex-1 flex-col-reverse items-center gap-0.5 sm:flex-col sm:items-start sm:gap-0 sm:pt-0">
+                    <p className="text-[10px] font-medium text-[var(--texte-secondaire)] sm:text-sm">Refusés</p>
+                    <p className="text-base font-bold tabular-nums text-red-600 sm:text-2xl md:text-3xl">
                       <NombreAnime valeur={statsConges.refuses} />
                     </p>
                   </div>
                 </CarteContenu>
               </Carte>
             </motion.div>
-          </div>
+          </GrilleStatsKpi>
 
           <Carte className="flex max-xl:min-h-[18rem] flex-1 flex-col overflow-hidden xl:min-h-0">
             <CarteEntete className="shrink-0 pb-3 pt-5">
@@ -339,7 +340,7 @@ export function PageGestionCongesRh() {
                 {actionModal === "traiter" && "Traiter la demande"}
               </TitreDialogue>
             </EnteteDialogue>
-            <div className="grid gap-4 pt-2">
+            <div className="grid gap-2.5 sm:gap-4 pt-1.5 sm:pt-2">
               <div className="rounded-xl bg-[var(--surface-mute)] p-4">
                 <div className="mb-2 flex items-center gap-2">
                   <User className="size-4 text-[var(--accent-principal)]" />
@@ -406,7 +407,7 @@ export function PageGestionCongesRh() {
         )}
       </Dialogue>
 
-      <div ref={refSectionListeDemandes} className="grid scroll-mt-20 gap-3 sm:gap-4 lg:gap-6">
+      <div ref={refSectionListeDemandes} className="grid scroll-mt-20 gap-2 sm:gap-4 lg:gap-6">
         <Carte>
           <CarteEntete>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
