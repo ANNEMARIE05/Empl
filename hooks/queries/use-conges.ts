@@ -16,7 +16,6 @@ export function useMiseAJourCongeRh() {
     mutationFn: (args: {
       id: string;
       commentaireRh?: string;
-      noteInterneRh?: string;
       statut?: StatutDemandeConge;
     }) => patchConge(args.id, args),
     onSuccess: () => {

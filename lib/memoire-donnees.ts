@@ -60,7 +60,7 @@ export function lireConges(): DemandeConge[] {
 
 export function mettreAJourConge(
   id: string,
-  patch: Partial<Pick<DemandeConge, "commentaireRh" | "noteInterneRh" | "statut">>,
+  patch: Partial<Pick<DemandeConge, "commentaireRh" | "statut">>,
 ): DemandeConge | null {
   const idx = demandesConges.findIndex((c) => c.id === id);
   if (idx === -1) return null;

@@ -70,7 +70,6 @@ export function PageGestionCongesRh() {
   const [modalOuverte, setModalOuverte] = useState(false);
   const [demandeSelectionnee, setDemandeSelectionnee] = useState<DemandeConge | null>(null);
   const [commentaireRh, setCommentaireRh] = useState("");
-  const [noteInterneRh, setNoteInterneRh] = useState("");
   const [actionModal, setActionModal] = useState<"valider" | "refuser" | "traiter">("traiter");
 
   const [recherche, setRecherche] = useState("");
@@ -136,7 +135,6 @@ export function PageGestionCongesRh() {
   const ouvrirModal = (demande: DemandeConge, action: "valider" | "refuser" | "traiter") => {
     setDemandeSelectionnee(demande);
     setCommentaireRh(demande.commentaireRh ?? "");
-    setNoteInterneRh(demande.noteInterneRh ?? "");
     setActionModal(action);
     setModalOuverte(true);
   };
@@ -145,7 +143,6 @@ export function PageGestionCongesRh() {
     setModalOuverte(false);
     setDemandeSelectionnee(null);
     setCommentaireRh("");
-    setNoteInterneRh("");
   };
 
   const confirmerAction = async () => {
@@ -157,7 +154,6 @@ export function PageGestionCongesRh() {
     await mutation.mutateAsync({
       id: demandeSelectionnee.id,
       commentaireRh,
-      noteInterneRh,
       statut: nouveauStatut,
     });
 
@@ -384,16 +380,6 @@ export function PageGestionCongesRh() {
                   value={commentaireRh}
                   onChange={(e) => setCommentaireRh(e.target.value)}
                   placeholder="Ce commentaire sera visible par l'employe..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Etiquette htmlFor="note-interne">Note interne RH</Etiquette>
-                <ZoneTexte
-                  id="note-interne"
-                  rows={2}
-                  value={noteInterneRh}
-                  onChange={(e) => setNoteInterneRh(e.target.value)}
-                  placeholder="Note interne (non visible par l'employe)..."
                 />
               </div>
               <div className="flex justify-end gap-3 border-t border-[var(--bordure)] pt-4">

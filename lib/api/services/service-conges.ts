@@ -10,7 +10,6 @@ export async function patchConge(
   id: string,
   corps: {
     commentaireRh?: string;
-    noteInterneRh?: string;
     statut?: StatutDemandeConge;
   },
 ): Promise<DemandeConge> {

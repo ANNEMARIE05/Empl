@@ -40,7 +40,7 @@ function tonStatut(s: StatutDemandeDocument) {
 const optionsStatut = [
   { valeur: "en_attente", libelle: "En attente" },
   { valeur: "en_traitement", libelle: "En traitement" },
-  { valeur: "pret", libelle: "Pret" },
+  { valeur: "pret", libelle: "Validés" },
   { valeur: "refuse", libelle: "Refuse" },
 ];
 

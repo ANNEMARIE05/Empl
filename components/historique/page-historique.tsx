@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { History, FileText } from "lucide-react";
+import { History, FileText, Loader2 } from "lucide-react";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
 import {
   Tableau,
@@ -17,206 +17,112 @@ import { BarreRecherche } from "@/components/ui/barre-recherche";
 import { FiltreSelect } from "@/components/ui/filtre-select";
 import { Pagination } from "@/components/ui/pagination";
 import { Pastille } from "@/components/ui/badge";
+import { useConges } from "@/hooks/queries/use-conges";
+import { useDocuments } from "@/hooks/queries/use-documents";
+import { useEmployes } from "@/hooks/queries/use-employes";
+import { useNotifications } from "@/hooks/queries/use-notifications";
+import { creerAbsencesDemo } from "@/lib/donnees-absences-demo";
+import {
+  construireEvenementsHistorique,
+  filtrerAbsencesPourContexte,
+  type LigneHistorique,
+  type ModuleHistorique,
+} from "@/lib/construire-evenements-historique";
 import { magasinApplication } from "@/stores/magasin-application";
 
-interface Evenement {
-  id: string;
-  quand: Date;
-  acteur: string;
-  action: string;
-  cible: string;
-  type: "validation" | "creation" | "modification" | "suppression" | "soumission";
-  /** Employés pour lesquels l’événement est pertinent (audit personnel). */
-  employeIdsConcernes: string[];
-}
-
-const evenementsMock: Evenement[] = [
-  {
-    id: "h1",
-    quand: new Date(),
-    acteur: "Marie Dubois",
-    action: "Validation conge",
-    cible: "Thomas Martin",
-    type: "validation",
-    employeIdsConcernes: ["e1", "e2"],
-  },
-  {
-    id: "h2",
-    quand: subDays(new Date(), 1),
-    acteur: "Systeme",
-    action: "Creation demande document",
-    cible: "Karim Benali",
-    type: "creation",
-    employeIdsConcernes: ["e4"],
-  },
-  {
-    id: "h3",
-    quand: subDays(new Date(), 3),
-    acteur: "Thomas Martin",
-    action: "Soumission demande conges",
-    cible: "Thomas Martin",
-    type: "soumission",
-    employeIdsConcernes: ["e2"],
-  },
-  {
-    id: "h4",
-    quand: subDays(new Date(), 4),
-    acteur: "Lea Bernard",
-    action: "Modification profil",
-    cible: "Lea Bernard",
-    type: "modification",
-    employeIdsConcernes: ["e3"],
-  },
-  {
-    id: "h5",
-    quand: subDays(new Date(), 5),
-    acteur: "Marie Dubois",
-    action: "Suppression document",
-    cible: "Ancien document",
-    type: "suppression",
-    employeIdsConcernes: ["e1"],
-  },
-  {
-    id: "h6",
-    quand: subDays(new Date(), 6),
-    acteur: "Karim Benali",
-    action: "Soumission demande RTT",
-    cible: "Karim Benali",
-    type: "soumission",
-    employeIdsConcernes: ["e4"],
-  },
-  {
-    id: "h7",
-    quand: subDays(new Date(), 7),
-    acteur: "Marie Dubois",
-    action: "Validation conge",
-    cible: "Lea Bernard",
-    type: "validation",
-    employeIdsConcernes: ["e1", "e3"],
-  },
-  {
-    id: "h8",
-    quand: subDays(new Date(), 8),
-    acteur: "Systeme",
-    action: "Creation notification",
-    cible: "Tous les employes",
-    type: "creation",
-    employeIdsConcernes: ["e1", "e2", "e3", "e4"],
-  },
-  {
-    id: "h9",
-    quand: subDays(new Date(), 9),
-    acteur: "Thomas Martin",
-    action: "Modification coordonnees",
-    cible: "Thomas Martin",
-    type: "modification",
-    employeIdsConcernes: ["e2"],
-  },
-  {
-    id: "h10",
-    quand: subDays(new Date(), 10),
-    acteur: "Marie Dubois",
-    action: "Creation employe",
-    cible: "Pierre Durand",
-    type: "creation",
-    employeIdsConcernes: ["e1"],
-  },
-  {
-    id: "h11",
-    quand: subDays(new Date(), 11),
-    acteur: "Lea Bernard",
-    action: "Soumission absence",
-    cible: "Lea Bernard",
-    type: "soumission",
-    employeIdsConcernes: ["e3"],
-  },
-  {
-    id: "h12",
-    quand: subDays(new Date(), 12),
-    acteur: "Systeme",
-    action: "Rappel automatique",
-    cible: "Validation en attente",
-    type: "creation",
-    employeIdsConcernes: ["e1"],
-  },
+const OPTIONS_MODULE: { valeur: ModuleHistorique; libelle: string }[] = [
+  { valeur: "conges", libelle: "Congés" },
+  { valeur: "documents", libelle: "Documents" },
+  { valeur: "notifications", libelle: "Notifications" },
+  { valeur: "absences", libelle: "Absences" },
 ];
 
-const optionsType = [
-  { valeur: "validation", libelle: "Validation" },
-  { valeur: "creation", libelle: "Creation" },
-  { valeur: "modification", libelle: "Modification" },
-  { valeur: "suppression", libelle: "Suppression" },
-  { valeur: "soumission", libelle: "Soumission" },
-];
-
-const ELEMENTS_PAR_PAGE = 5;
-
-function getTonType(type: Evenement["type"]) {
-  switch (type) {
-    case "validation":
-      return "succes";
-    case "creation":
-      return "accent";
-    case "modification":
-      return "alerte";
-    case "suppression":
-      return "danger";
-    case "soumission":
-      return "neutre";
-    default:
-      return "neutre";
-  }
-}
+const ELEMENTS_PAR_PAGE = 8;
 
 export function PageHistorique() {
   const utilisateur = magasinApplication((s) => s.utilisateurConnecte);
+  const roleEmployesActif =
+    utilisateur?.role === "rh" || utilisateur?.role === "manager" ? true : false;
+
+  const { data: conges = [], isPending: chargeConges } = useConges();
+  const { data: documents = [], isPending: chargeDocuments } = useDocuments();
+  const { data: employes = [], isPending: chargeEmployes } = useEmployes({
+    enabled: roleEmployesActif,
+  });
+  const { data: notifications = [], isPending: chargeNotifications } = useNotifications();
+
   const [recherche, setRecherche] = useState("");
-  const [filtreType, setFiltreType] = useState("");
-  const [filtreActeur, setFiltreActeur] = useState("");
+  const [filtreModule, setFiltreModule] = useState("");
+  const [filtreCollaborateur, setFiltreCollaborateur] = useState("");
   const [page, setPage] = useState(1);
 
-  const evenementsPourUtilisateur = useMemo(() => {
+  const carnetEmployes = useMemo(() => {
     if (!utilisateur) return [];
-    if (utilisateur.role === "rh") return evenementsMock;
-    return evenementsMock.filter((e) => e.employeIdsConcernes.includes(utilisateur.id));
-  }, [utilisateur]);
+    if (employes.length > 0) return employes;
+    return [utilisateur];
+  }, [employes, utilisateur]);
 
-  const optionsActeur = useMemo(() => {
-    const acteurs = [...new Set(evenementsPourUtilisateur.map((e) => e.acteur))].sort((a, b) =>
-      a.localeCompare(b, "fr")
+  const absencesFiltrees = useMemo(() => {
+    if (!utilisateur) return [];
+    return filtrerAbsencesPourContexte(creerAbsencesDemo(), utilisateur.role, utilisateur, employes);
+  }, [utilisateur, employes]);
+
+  const lignesCompletes = useMemo(() => {
+    if (!utilisateur) return [];
+    return construireEvenementsHistorique({
+      employes: carnetEmployes,
+      conges,
+      documents,
+      notifications,
+      absences: absencesFiltrees,
+      utilisateur,
+    });
+  }, [utilisateur, carnetEmployes, conges, documents, notifications, absencesFiltrees]);
+
+  const lignesPourUtilisateur = useMemo(() => {
+    if (!utilisateur) return [];
+    if (utilisateur.role === "rh") return lignesCompletes;
+    return lignesCompletes.filter((l) => l.employeIdsConcernes.includes(utilisateur.id));
+  }, [utilisateur, lignesCompletes]);
+
+  const optionsCollaborateur = useMemo(() => {
+    const noms = [...new Set(lignesPourUtilisateur.map((l) => l.collaborateur))].sort((a, b) =>
+      a.localeCompare(b, "fr"),
     );
-    return acteurs.map((a) => ({ valeur: a, libelle: a }));
-  }, [evenementsPourUtilisateur]);
+    return noms.map((n) => ({ valeur: n, libelle: n }));
+  }, [lignesPourUtilisateur]);
 
   const donneesFiltrees = useMemo(() => {
-    return evenementsPourUtilisateur.filter((e) => {
-      const correspondRecherche =
-        e.acteur.toLowerCase().includes(recherche.toLowerCase()) ||
-        e.action.toLowerCase().includes(recherche.toLowerCase()) ||
-        e.cible.toLowerCase().includes(recherche.toLowerCase());
-      const correspondType = !filtreType || e.type === filtreType;
-      const correspondActeur = !filtreActeur || e.acteur === filtreActeur;
-      return correspondRecherche && correspondType && correspondActeur;
+    const q = recherche.trim().toLowerCase();
+    return lignesPourUtilisateur.filter((l) => {
+      const texte = `${l.espace} ${l.collaborateur} ${l.evenement} ${l.detail} ${l.etat}`.toLowerCase();
+      const correspondRecherche = !q || texte.includes(q);
+      const correspondModule = !filtreModule || l.module === filtreModule;
+      const correspondCollab = !filtreCollaborateur || l.collaborateur === filtreCollaborateur;
+      return correspondRecherche && correspondModule && correspondCollab;
     });
-  }, [evenementsPourUtilisateur, recherche, filtreType, filtreActeur]);
+  }, [lignesPourUtilisateur, recherche, filtreModule, filtreCollaborateur]);
 
   const donneesPaginees = donneesFiltrees.slice(
     (page - 1) * ELEMENTS_PAR_PAGE,
-    page * ELEMENTS_PAR_PAGE
+    page * ELEMENTS_PAR_PAGE,
   );
+
+  const charge =
+    chargeConges || chargeDocuments || chargeNotifications || (roleEmployesActif && chargeEmployes);
 
   const handleRecherche = (val: string) => {
     setRecherche(val);
     setPage(1);
   };
 
-  const handleFiltreType = (val: string) => {
-    setFiltreType(val);
+  const handleFiltreModule = (val: string) => {
+    setFiltreModule(val);
     setPage(1);
   };
 
-  const handleFiltreActeur = (val: string) => {
-    setFiltreActeur(val);
+  const handleFiltreCollaborateur = (val: string) => {
+    setFiltreCollaborateur(val);
     setPage(1);
   };
 
@@ -229,17 +135,18 @@ export function PageHistorique() {
           <History className="size-6 text-[var(--accent-principal)]" />
         </div>
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Journal d&apos;activite</h2>
+          <h2 className="text-xl font-bold tracking-tight">Historique</h2>
           <p className="text-sm text-[var(--texte-secondaire)]">
             {utilisateur.role !== "rh" ? (
               <>
-                Votre historique personnel — {donneesFiltrees.length} evenement
-                {donneesFiltrees.length > 1 ? "s" : ""} enregistre{donneesFiltrees.length > 1 ? "s" : ""}
+                Congés, documents, absences et notifications vous concernant — {donneesFiltrees.length}{" "}
+                entrée
+                {donneesFiltrees.length > 1 ? "s" : ""}
               </>
             ) : (
               <>
-                {donneesFiltrees.length} evenement{donneesFiltrees.length > 1 ? "s" : ""} enregistre
-                {donneesFiltrees.length > 1 ? "s" : ""}
+                Vue consolidée des espaces Congés, Documents, Absences et Notifications —{" "}
+                {donneesFiltrees.length} entrée{donneesFiltrees.length > 1 ? "s" : ""}
               </>
             )}
           </p>
@@ -248,81 +155,94 @@ export function PageHistorique() {
 
       <Carte>
         <CarteEntete>
-          <CarteTitre>Historique des actions</CarteTitre>
-          <CarteDescription>Evenements recents pour audit interne et suivi.</CarteDescription>
+          <CarteTitre>Journal des opérations</CarteTitre>
+          <CarteDescription>
+            Chaque ligne reprend les informations utiles des écrans correspondants : personne concernée,
+            nature de l&apos;événement, précisions (dates, types, messages) et état de suivi.
+          </CarteDescription>
         </CarteEntete>
         <CarteContenu className="space-y-4">
-          {/* Barre de filtres et recherche */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <BarreRecherche
               valeur={recherche}
               onChangerValeur={handleRecherche}
-              placeholder="Rechercher acteur, action, cible..."
-              className="w-full sm:max-w-xs"
+              placeholder="Rechercher (espace, collaborateur, événement, détail…)"
+              className="w-full sm:max-w-md"
             />
             <div className="flex flex-wrap gap-2">
               <FiltreSelect
-                valeur={filtreType}
-                onChangerValeur={handleFiltreType}
-                options={optionsType}
-                placeholder="Tous les types"
-                label="Filtrer par type"
-                className="w-full sm:w-44"
+                valeur={filtreModule}
+                onChangerValeur={handleFiltreModule}
+                options={OPTIONS_MODULE}
+                placeholder="Tous les espaces"
+                label="Filtrer par espace"
+                className="w-full sm:w-48"
               />
               <FiltreSelect
-                valeur={filtreActeur}
-                onChangerValeur={handleFiltreActeur}
-                options={optionsActeur}
-                placeholder="Tous les acteurs"
-                label="Filtrer par acteur"
-                className="w-full sm:w-44"
+                valeur={filtreCollaborateur}
+                onChangerValeur={handleFiltreCollaborateur}
+                options={optionsCollaborateur}
+                placeholder="Tous les collaborateurs"
+                label="Filtrer par collaborateur"
+                className="w-full sm:w-52"
               />
             </div>
           </div>
 
-          {/* Tableau */}
-          {donneesPaginees.length === 0 ? (
+          {charge ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+              <Loader2 className="size-10 animate-spin text-[var(--accent-principal)]" />
+              <p className="text-sm text-[var(--texte-secondaire)]">Chargement de l&apos;historique…</p>
+            </div>
+          ) : donneesPaginees.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FileText className="size-12 text-[var(--texte-secondaire)]/40 mb-3" />
-              <p className="text-sm text-[var(--texte-secondaire)]">Aucun evenement trouve.</p>
+              <p className="text-sm text-[var(--texte-secondaire)]">Aucune entrée ne correspond à vos filtres.</p>
             </div>
           ) : (
-            <Tableau>
-              <TableauEntete>
-                <TableauRangee>
-                  <TableauCelluleEntete>Horodatage</TableauCelluleEntete>
-                  <TableauCelluleEntete>Acteur</TableauCelluleEntete>
-                  <TableauCelluleEntete>Action</TableauCelluleEntete>
-                  <TableauCelluleEntete>Cible</TableauCelluleEntete>
-                  <TableauCelluleEntete>Type</TableauCelluleEntete>
-                </TableauRangee>
-              </TableauEntete>
-              <TableauCorps>
-                {donneesPaginees.map((e) => (
-                  <TableauRangee key={e.id} className="group ligne-liste-luxe">
-                    <TableauCellule className="whitespace-nowrap text-xs">
-                      {format(e.quand, "dd/MM/yyyy HH:mm", { locale: fr })}
-                    </TableauCellule>
-                    <TableauCellule>
-                      <span className="font-medium">{e.acteur}</span>
-                    </TableauCellule>
-                    <TableauCellule>{e.action}</TableauCellule>
-                    <TableauCellule>
-                      <span className="text-[var(--texte-secondaire)]">{e.cible}</span>
-                    </TableauCellule>
-                    <TableauCellule>
-                      <Pastille ton={getTonType(e.type)}>
-                        {e.type.charAt(0).toUpperCase() + e.type.slice(1)}
-                      </Pastille>
-                    </TableauCellule>
+            <div className="overflow-x-auto rounded-xl border border-[var(--bordure)]/40">
+              <Tableau>
+                <TableauEntete>
+                  <TableauRangee>
+                    <TableauCelluleEntete className="min-w-[9.5rem]">Date et heure</TableauCelluleEntete>
+                    <TableauCelluleEntete className="min-w-[7rem]">Espace</TableauCelluleEntete>
+                    <TableauCelluleEntete className="min-w-[8.5rem]">Collaborateur</TableauCelluleEntete>
+                    <TableauCelluleEntete className="min-w-[10rem]">Événement</TableauCelluleEntete>
+                    <TableauCelluleEntete className="min-w-[14rem]">Détail</TableauCelluleEntete>
+                    <TableauCelluleEntete className="min-w-[7rem]">État</TableauCelluleEntete>
                   </TableauRangee>
-                ))}
-              </TableauCorps>
-            </Tableau>
+                </TableauEntete>
+                <TableauCorps>
+                  {donneesPaginees.map((l: LigneHistorique) => (
+                    <TableauRangee key={l.id} className="group ligne-liste-luxe align-top">
+                      <TableauCellule className="whitespace-nowrap text-xs tabular-nums">
+                        {format(l.quand, "dd/MM/yyyy HH:mm", { locale: fr })}
+                      </TableauCellule>
+                      <TableauCellule>
+                        <Pastille ton="neutre" className="normal-case tracking-normal">
+                          {l.espace}
+                        </Pastille>
+                      </TableauCellule>
+                      <TableauCellule>
+                        <span className="font-medium text-[var(--texte-principal)]">{l.collaborateur}</span>
+                      </TableauCellule>
+                      <TableauCellule className="text-sm">{l.evenement}</TableauCellule>
+                      <TableauCellule className="max-w-[22rem] text-sm text-[var(--texte-secondaire)] leading-snug">
+                        {l.detail}
+                      </TableauCellule>
+                      <TableauCellule>
+                        <Pastille ton={l.tonEtat} className="normal-case tracking-normal">
+                          {l.etat}
+                        </Pastille>
+                      </TableauCellule>
+                    </TableauRangee>
+                  ))}
+                </TableauCorps>
+              </Tableau>
+            </div>
           )}
 
-          {/* Pagination */}
-          {donneesFiltrees.length > 0 && (
+          {!charge && donneesFiltrees.length > 0 && (
             <div className="border-t border-[var(--bordure)]/50 pt-4">
               <Pagination
                 pageActuelle={page}

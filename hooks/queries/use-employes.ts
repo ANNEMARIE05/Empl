@@ -8,10 +8,11 @@ import {
 import { clesRequetes } from "@/hooks/queries/cles-requetes";
 import type { Employe } from "@/types";
 
-export function useEmployes() {
+export function useEmployes(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: clesRequetes.employes,
     queryFn: fetchEmployes,
+    enabled: options?.enabled !== false,
   });
 }
 

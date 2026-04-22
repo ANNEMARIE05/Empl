@@ -135,7 +135,7 @@ export function PageDocumentsRh() {
     { value: "tous", label: "Tous les statuts" },
     { value: "en_attente", label: "En attente" },
     { value: "en_traitement", label: "En traitement" },
-    { value: "pret", label: "Pret" },
+    { value: "pret", label: "Validés" },
     { value: "refuse", label: "Refuse" },
   ];
 
@@ -156,7 +156,7 @@ export function PageDocumentsRh() {
             <div className="border-b border-[var(--bordure)] p-5">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-[var(--texte-principal)]">
-                  {actionModal === "pret" && "Marquer comme pret"}
+                  {actionModal === "pret" && "Valider la demande"}
                   {actionModal === "refuser" && "Refuser la demande"}
                   {actionModal === "traiter" && "Traiter la demande"}
                 </h2>
@@ -218,7 +218,7 @@ export function PageDocumentsRh() {
                 variante={actionModal === "refuser" ? "destructif" : "defaut"}
               >
                 {mutation.isPending ? "En cours..." : (
-                  actionModal === "pret" ? "Marquer pret" :
+                  actionModal === "pret" ? "Valider" :
                   actionModal === "refuser" ? "Refuser" :
                   "Enregistrer"
                 )}
@@ -359,7 +359,7 @@ export function PageDocumentsRh() {
                               onClick={() => ouvrirModal(d, "pret")}
                             >
                               <Check className="size-4" />
-                              Pret
+                              Valider
                             </Bouton>
                             <Bouton
                               taille="sm"
@@ -443,7 +443,7 @@ export function PageDocumentsRh() {
                                   onClick={() => ouvrirModal(d, "pret")}
                                 >
                                   <Check className="size-3" />
-                                  Pret
+                                  Valider
                                 </Bouton>
                                 <Bouton
                                   taille="sm"

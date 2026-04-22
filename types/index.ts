@@ -50,8 +50,6 @@ export interface DemandeConge {
   motif?: string;
   /** Visible côté employé dans le suivi */
   commentaireRh?: string;
-  /** Notes internes RH (non affichées employé dans ce mock) */
-  noteInterneRh?: string;
   creeLe: string;
 }
 

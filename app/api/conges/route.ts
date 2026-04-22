@@ -41,7 +41,6 @@ export async function PATCH(req: NextRequest) {
     const body = (await req.json()) as {
       id?: string;
       commentaireRh?: string;
-      noteInterneRh?: string;
       statut?: StatutDemandeConge;
     };
     if (!body.id) {
@@ -49,7 +48,6 @@ export async function PATCH(req: NextRequest) {
     }
     const maj = mettreAJourConge(body.id, {
       commentaireRh: body.commentaireRh,
-      noteInterneRh: body.noteInterneRh,
       statut: body.statut,
     });
     if (!maj) return NextResponse.json({ message: "Introuvable" }, { status: 404 });

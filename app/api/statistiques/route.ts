@@ -21,9 +21,9 @@ function construireStats(idsEmployesConcernes: string[] | null): StatistiquesTab
 
   const compteStatuts = (statut: string) => conges.filter((c) => c.statut === statut).length;
   const repartitionStatutsConges = [
-    { nom: "Validé", valeur: compteStatuts("valide") || 1 },
+    { nom: "Validés", valeur: compteStatuts("valide") || 1 },
     { nom: "En attente", valeur: compteStatuts("en_attente") || 1 },
-    { nom: "Refusé", valeur: compteStatuts("refuse") || 0 },
+    { nom: "Refusés", valeur: compteStatuts("refuse") || 0 },
   ];
 
   const repartitionTypesDocuments = [

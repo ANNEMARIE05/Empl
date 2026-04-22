@@ -122,7 +122,7 @@ export function TableauBordRh() {
                   <Users className="size-5 text-[var(--accent-principal)]" />
                 </div>
                 <div>
-                  <CarteTitre>Total employes</CarteTitre>
+                  <CarteTitre>Total employés</CarteTitre>
                   <CarteDescription>Effectif global</CarteDescription>
                 </div>
               </div>

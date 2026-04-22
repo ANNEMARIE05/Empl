@@ -16,7 +16,7 @@ export function libelleStatutDocument(s: StatutDemandeDocument) {
   const map: Record<StatutDemandeDocument, string> = {
     en_attente: "En attente",
     en_traitement: "En traitement",
-    pret: "Prêt",
+    pret: "Validés",
     refuse: "Refusé",
   };
   return map[s];

@@ -43,7 +43,10 @@ const titresPages: Partial<
   parametrage: { titre: "Paramétrage", sousTitre: "Référentiels et règles métiers (RH)." },
   parametres: { titre: "Paramètres", sousTitre: "Préférences de session et affichage." },
   absences: { titre: "Absences", sousTitre: "Synthèse des indisponibilités déclarées." },
-  historique: { titre: "Historique", sousTitre: "Journal des actions et validations." },
+  historique: {
+    titre: "Historique",
+    sousTitre: "Congés, documents, absences et notifications — journal consolidé.",
+  },
 };
 
 export function EnteteApplication({
