@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { Bell, Menu, Moon, Plus, Search, Sun } from "lucide-react";
+import { Bell, Menu, Moon, Search, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Bouton } from "@/components/ui/button";
 import { Entree } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImageProfilUtilisateur } from "@/components/ui/image-profil-utilisateur";
 import { magasinApplication } from "@/stores/magasin-application";
 import type { IdOnglet } from "@/types";
 import { useNotifications, useMarquerNotificationLue } from "@/hooks/queries/use-notifications";
@@ -31,7 +31,7 @@ const titresPages: Partial<
     }
   >
 > = {
-  "tableau-bord": { titre: "Pilotage RH", sousTitre: "Vue consolidée des flux et alertes." },
+  "tableau-bord": { titre: "Tableau de bord", sousTitre: "Vue consolidée des flux et alertes." },
   employes: { titre: "Annuaire employés", sousTitre: "Profils, affectations et contacts." },
   conges: { titre: "Gestion des congés", sousTitre: "Validation, commentaires et charge d’équipe." },
   "mes-conges": { titre: "Mes congés", sousTitre: "Demandes, calendrier et soldes estimés." },
@@ -49,11 +49,9 @@ const titresPages: Partial<
 export function EnteteApplication({
   margeGauche,
   surMenuMobile,
-  surNouvelleDemande,
 }: {
   margeGauche: number;
   surMenuMobile: () => void;
-  surNouvelleDemande?: () => void;
 }) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
@@ -79,10 +77,10 @@ export function EnteteApplication({
   return (
     <motion.header
       layout
-      className="fixed top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--bordure)]/50 bg-[var(--surface-elevee)]/90 px-4 shadow-sm backdrop-blur-xl sm:px-6"
+      className="fixed top-0 z-30 flex h-14 items-center justify-between border-b border-[var(--bordure)]/50 bg-[var(--surface-elevee)]/90 px-2.5 shadow-sm backdrop-blur-xl dark:border-[var(--bordure)]/40 dark:shadow-none sm:h-16 sm:px-6"
       style={{ left: margeGauche, right: 0 }}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
         <Bouton
           variante="fantome"
           taille="icone"
@@ -97,7 +95,7 @@ export function EnteteApplication({
             key={ongletActif}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="truncate text-lg font-bold tracking-tight"
+            className="truncate text-base font-bold tracking-tight sm:text-lg"
           >
             {entete.titre}
           </motion.h1>
@@ -133,16 +131,7 @@ export function EnteteApplication({
           )}
         </div>
 
-        {(ongletActif === "conges" ||
-          ongletActif === "mes-conges" ||
-          ongletActif === "documents" ||
-          ongletActif === "mes-documents") &&
-          utilisateur.role !== "rh" && (
-            <Bouton taille="sm" onClick={surNouvelleDemande} className="hidden gap-1.5 sm:inline-flex">
-              <Plus className="size-4" />
-              <span>Nouvelle demande</span>
-            </Bouton>
-          )}
+
 
         <MenuDeroulant>
           <DeclencheurMenuDeroulant asChild>
@@ -210,23 +199,36 @@ export function EnteteApplication({
               type="button"
               className="group flex items-center gap-2.5 rounded-xl border border-[var(--bordure)]/50 bg-[var(--surface-mute)]/30 px-2 py-1.5 transition-all hover:border-[var(--bordure)] hover:bg-[var(--surface-mute)]/50"
             >
-              <Avatar className="size-8 ring-2 ring-[var(--surface-elevee)]">
-                {utilisateur.photoUrl ? <AvatarImage src={utilisateur.photoUrl} alt="" /> : null}
-                <AvatarFallback className="bg-[var(--accent-principal)]/15 text-xs font-semibold text-[var(--accent-principal)]">
-                  {utilisateur.prenom[0]}
-                  {utilisateur.nom[0]}
-                </AvatarFallback>
-              </Avatar>
+              <ImageProfilUtilisateur
+                photoUrl={utilisateur.photoUrl}
+                role={utilisateur.role}
+                prenom={utilisateur.prenom}
+                nom={utilisateur.nom}
+                taille="sm"
+                className="ring-2 ring-[var(--surface-elevee)]"
+              />
               <div className="hidden text-left sm:block">
                 <div className="text-sm font-medium leading-tight">{utilisateur.prenom}</div>
                 <div className="text-[10px] font-medium text-[var(--texte-secondaire)]">{roleLibelle}</div>
               </div>
             </button>
           </DeclencheurMenuDeroulant>
-          <ContenuMenuDeroulant align="end" className="w-48 rounded-xl border-[var(--bordure)]/50 shadow-xl">
-            <div className="px-3 py-2">
-              <p className="text-sm font-medium">{utilisateur.prenom} {utilisateur.nom}</p>
-              <p className="text-xs text-[var(--texte-secondaire)]">{utilisateur.departement}</p>
+          <ContenuMenuDeroulant align="end" className="w-56 rounded-xl border-[var(--bordure)]/50 shadow-xl">
+            <div className="flex items-center gap-3 px-3 py-2">
+              <ImageProfilUtilisateur
+                photoUrl={utilisateur.photoUrl}
+                role={utilisateur.role}
+                prenom={utilisateur.prenom}
+                nom={utilisateur.nom}
+                taille="md"
+                className="ring-2 ring-[var(--bordure)]/40"
+              />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">
+                  {utilisateur.prenom} {utilisateur.nom}
+                </p>
+                <p className="truncate text-xs text-[var(--texte-secondaire)]">{utilisateur.departement}</p>
+              </div>
             </div>
             <SeparateurMenuDeroulant />
             <ElementMenuDeroulant

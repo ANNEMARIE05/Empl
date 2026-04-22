@@ -290,7 +290,7 @@ export function VueParametrage() {
     ));
   };
 
-  const commencerEdition = (id: string, data: Record<string, unknown>) => {
+  const commencerEdition = (id: string, data: object) => {
     setModeEdition(id);
     setFormData(data as Record<string, string | number | boolean | string[]>);
   };
@@ -1227,7 +1227,7 @@ export function VueParametrage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Carte>
         <CarteEntete>
           <div className="flex items-center gap-3">
@@ -1244,7 +1244,7 @@ export function VueParametrage() {
         </CarteEntete>
       </Carte>
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-3 sm:gap-4 lg:gap-6 lg:grid-cols-[280px_1fr]">
         {/* Navigation laterale */}
         <div className="space-y-2">
           {onglets.map((onglet) => (
@@ -1280,7 +1280,7 @@ export function VueParametrage() {
 
         {/* Contenu */}
         <Carte>
-          <CarteContenu>
+          <CarteContenu className="pt-3">
             <AnimatePresence mode="wait">
               <motion.div
                 key={ongletActif}

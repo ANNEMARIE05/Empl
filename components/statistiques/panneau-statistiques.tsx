@@ -21,12 +21,23 @@ import {
 
 const accent = "var(--accent-principal)";
 
+const styleInfobulle = {
+  borderRadius: "var(--rayon-md)",
+  border: "1px solid var(--bordure)",
+  background: "var(--surface-elevee)",
+  color: "var(--texte-principal)",
+  boxShadow: "var(--ombre-douce)",
+};
+
+/** Curseur SVG de l'infobulle : pas de remplissage ni trait visibles au survol */
+const curseurOpaciteZero = { fillOpacity: 0, strokeOpacity: 0 };
+
 export function PanneauStatistiques() {
   const { data, isLoading, isError } = useStatistiques(true);
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-2.5 sm:gap-4 md:grid-cols-3">
         <Squelette className="h-28" />
         <Squelette className="h-28" />
         <Squelette className="h-28" />
@@ -39,15 +50,15 @@ export function PanneauStatistiques() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid gap-2.5 sm:gap-4 md:grid-cols-4">
         <Carte>
           <CarteEntete>
             <CarteTitre>Employés suivis</CarteTitre>
             <CarteDescription>Périmètre de votre vue.</CarteDescription>
           </CarteEntete>
           <CarteContenu>
-            <p className="text-3xl font-semibold">
+            <p className="text-2xl font-semibold sm:text-3xl">
               <NombreAnime valeur={data.volumeEmployesActifs} />
             </p>
           </CarteContenu>
@@ -57,7 +68,7 @@ export function PanneauStatistiques() {
             <CarteTitre>Taux validation congés</CarteTitre>
           </CarteEntete>
           <CarteContenu>
-            <p className="text-3xl font-semibold">
+            <p className="text-2xl font-semibold sm:text-3xl">
               <NombreAnime valeur={data.tauxValidationConges} suffixe="%" />
             </p>
           </CarteContenu>
@@ -67,7 +78,7 @@ export function PanneauStatistiques() {
             <CarteTitre>Délai moyen</CarteTitre>
           </CarteEntete>
           <CarteContenu>
-            <p className="text-3xl font-semibold">
+            <p className="text-2xl font-semibold sm:text-3xl">
               <NombreAnime valeur={data.delaiMoyenTraitementJours} decimales={1} suffixe=" j" />
             </p>
           </CarteContenu>
@@ -77,7 +88,7 @@ export function PanneauStatistiques() {
             <CarteTitre>Charge documents</CarteTitre>
           </CarteEntete>
           <CarteContenu>
-            <p className="text-3xl font-semibold">
+            <p className="text-2xl font-semibold sm:text-3xl">
               <NombreAnime
                 valeur={data.seriesMensuelles.reduce((a, b) => a + b.demandesDocuments, 0)}
               />
@@ -86,7 +97,7 @@ export function PanneauStatistiques() {
         </Carte>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-2.5 sm:gap-4 xl:grid-cols-2">
         <Carte>
           <CarteEntete>
             <CarteTitre>Flux congés / documents</CarteTitre>
@@ -95,24 +106,38 @@ export function PanneauStatistiques() {
           <CarteContenu className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data.seriesMensuelles}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--bordure)" vertical={false} />
-                <XAxis dataKey="mois" tick={{ fontSize: 11 }} stroke="var(--texte-secondaire)" />
-                <YAxis tick={{ fontSize: 11 }} stroke="var(--texte-secondaire)" />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "var(--rayon-md)",
-                    borderColor: "var(--bordure)",
-                    background: "var(--surface-elevee)",
-                  }}
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--graphique-grille)" vertical={false} />
+                <XAxis
+                  dataKey="mois"
+                  tick={{ fontSize: 11, fill: "var(--graphique-axis)" }}
+                  stroke="var(--graphique-grille)"
                 />
-                <Legend />
-                <Area type="monotone" dataKey="demandesConges" stackId="1" stroke={accent} fill={`${accent}55`} name="Congés" />
+                <YAxis tick={{ fontSize: 11, fill: "var(--graphique-axis)" }} stroke="var(--graphique-grille)" />
+                <Tooltip
+                  cursor={curseurOpaciteZero}
+                  contentStyle={styleInfobulle}
+                  labelStyle={{ color: "var(--texte-secondaire)" }}
+                  itemStyle={{ color: "var(--texte-principal)" }}
+                />
+                <Legend wrapperStyle={{ color: "var(--texte-secondaire)" }} />
+                <Area
+                  type="monotone"
+                  dataKey="demandesConges"
+                  stackId="1"
+                  stroke={accent}
+                  fill={accent}
+                  fillOpacity={0}
+                  activeDot={false}
+                  name="Congés"
+                />
                 <Area
                   type="monotone"
                   dataKey="demandesDocuments"
                   stackId="1"
-                  stroke="#0f172a"
-                  fill="#0f172a33"
+                  stroke="var(--graphique-serie-alt)"
+                  fill="var(--graphique-serie-alt-faible)"
+                  fillOpacity={0}
+                  activeDot={false}
                   name="Documents"
                 />
               </AreaChart>
@@ -128,17 +153,28 @@ export function PanneauStatistiques() {
           <CarteContenu className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data.seriesMensuelles}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--bordure)" vertical={false} />
-                <XAxis dataKey="mois" tick={{ fontSize: 11 }} stroke="var(--texte-secondaire)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--graphique-grille)" vertical={false} />
+                <XAxis
+                  dataKey="mois"
+                  tick={{ fontSize: 11, fill: "var(--graphique-axis)" }}
+                  stroke="var(--graphique-grille)"
+                />
                 <YAxis hide />
                 <Tooltip
-                  contentStyle={{
-                    borderRadius: "var(--rayon-md)",
-                    borderColor: "var(--bordure)",
-                    background: "var(--surface-elevee)",
-                  }}
+                  cursor={curseurOpaciteZero}
+                  contentStyle={styleInfobulle}
+                  labelStyle={{ color: "var(--texte-secondaire)" }}
+                  itemStyle={{ color: "var(--texte-principal)" }}
                 />
-                <Line type="monotone" dataKey="absences" stroke="#f97316" strokeWidth={2} dot={false} name="Absences" />
+                <Line
+                  type="monotone"
+                  dataKey="absences"
+                  stroke="var(--graphique-alerte)"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={false}
+                  name="Absences"
+                />
               </LineChart>
             </ResponsiveContainer>
           </CarteContenu>
@@ -152,19 +188,22 @@ export function PanneauStatistiques() {
         <CarteContenu className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.seriesMensuelles}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--bordure)" vertical={false} />
-              <XAxis dataKey="mois" tick={{ fontSize: 11 }} stroke="var(--texte-secondaire)" />
-              <YAxis tick={{ fontSize: 11 }} stroke="var(--texte-secondaire)" />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: "var(--rayon-md)",
-                  borderColor: "var(--bordure)",
-                  background: "var(--surface-elevee)",
-                }}
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--graphique-grille)" vertical={false} />
+              <XAxis
+                dataKey="mois"
+                tick={{ fontSize: 11, fill: "var(--graphique-axis)" }}
+                stroke="var(--graphique-grille)"
               />
-              <Legend />
+              <YAxis tick={{ fontSize: 11, fill: "var(--graphique-axis)" }} stroke="var(--graphique-grille)" />
+              <Tooltip
+                cursor={curseurOpaciteZero}
+                contentStyle={styleInfobulle}
+                labelStyle={{ color: "var(--texte-secondaire)" }}
+                itemStyle={{ color: "var(--texte-principal)" }}
+              />
+              <Legend wrapperStyle={{ color: "var(--texte-secondaire)" }} />
               <Bar dataKey="demandesConges" fill={accent} radius={[4, 4, 0, 0]} name="Congés" />
-              <Bar dataKey="demandesDocuments" fill="#334155" radius={[4, 4, 0, 0]} name="Documents" />
+              <Bar dataKey="demandesDocuments" fill="var(--graphique-barre-documents)" radius={[4, 4, 0, 0]} name="Documents" />
             </BarChart>
           </ResponsiveContainer>
         </CarteContenu>

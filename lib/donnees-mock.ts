@@ -16,7 +16,7 @@ export const employesMock: Employe[] = [
     poste: "Responsable RH",
     dateEmbauche: "2018-03-12",
     photoUrl:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a7a8?w=200&h=200&fit=crop",
+      "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop",
   },
   {
     id: "e2",
@@ -28,7 +28,7 @@ export const employesMock: Employe[] = [
     poste: "Coordinateur logistique",
     dateEmbauche: "2021-09-01",
     photoUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop",
+      "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop",
   },
   {
     id: "e3",
@@ -40,7 +40,7 @@ export const employesMock: Employe[] = [
     poste: "Manager d'équipe",
     dateEmbauche: "2019-01-15",
     photoUrl:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face",
   },
   {
     id: "e4",
@@ -52,7 +52,7 @@ export const employesMock: Employe[] = [
     poste: "Analyste",
     dateEmbauche: "2022-04-18",
     photoUrl:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
+      "https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop",
   },
 ];
 

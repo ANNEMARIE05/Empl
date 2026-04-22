@@ -23,6 +23,7 @@ import { VueMonProfil } from "@/components/profil/vue-mon-profil";
 import { PanneauStatistiques } from "@/components/statistiques/panneau-statistiques";
 import { useDefilementHaut } from "@/hooks/use-defilement-haut";
 import { useMediaRequete } from "@/hooks/use-media-requete";
+import { useZustandHydratationPret } from "@/hooks/use-zustand-hydratation";
 import { magasinApplication } from "@/stores/magasin-application";
 import type { IdOnglet } from "@/types";
 
@@ -31,11 +32,13 @@ function renduContenu({
   role,
   impulsionConge,
   impulsionDocument,
+  impulsionAbsence,
 }: {
   onglet: IdOnglet;
   role: "rh" | "manager" | "employe";
   impulsionConge: number;
   impulsionDocument: number;
+  impulsionAbsence: number;
 }) {
   switch (onglet) {
     case "tableau-bord":
@@ -45,7 +48,7 @@ function renduContenu({
     case "mes-conges":
       return <VueMesConges impulsionFormulaire={impulsionConge} />;
     case "absences":
-      return <PageAbsences />;
+      return <PageAbsences impulsionFormulaire={impulsionAbsence} />;
     case "mes-documents":
       return <VueMesDocuments impulsionFormulaire={impulsionDocument} />;
     case "employes":
@@ -79,23 +82,26 @@ export function CoquilleApplication() {
   const definirOngletActif = magasinApplication((s) => s.definirOngletActif);
   const resoudreOngletDepuisChaine = magasinApplication((s) => s.resoudreOngletDepuisChaine);
 
-  const [pret, setPret] = useState(false);
+  const zustandPret = useZustandHydratationPret();
+  const [introPret, setIntroPret] = useState(false);
   const [menuMobile, setMenuMobile] = useState(false);
   const [impulsionConge, setImpulsionConge] = useState(0);
   const [impulsionDocument, setImpulsionDocument] = useState(0);
+  const [impulsionAbsence, setImpulsionAbsence] = useState(0);
   const estLarge = useMediaRequete("(min-width: 1024px)");
 
   useEffect(() => {
-    const id = window.setTimeout(() => setPret(true), 650);
-    return () => window.clearTimeout(id);
-  }, []);
-
-  useEffect(() => {
-    if (!pret) return;
+    if (!zustandPret) return;
     if (!estAuthentifie) {
       router.replace("/login");
     }
-  }, [pret, estAuthentifie, router]);
+  }, [zustandPret, estAuthentifie, router]);
+
+  useEffect(() => {
+    if (!zustandPret) return;
+    const id = window.setTimeout(() => setIntroPret(true), 800);
+    return () => window.clearTimeout(id);
+  }, [zustandPret]);
 
   useEffect(() => {
     const page = searchParams.get("page");
@@ -111,6 +117,12 @@ export function CoquilleApplication() {
       router.replace("/?page=mes-documents");
       return;
     }
+    if (page === "formulaire-absence") {
+      definirOngletActif("absences");
+      window.setTimeout(() => setImpulsionAbsence((c) => c + 1), 0);
+      router.replace("/?page=absences");
+      return;
+    }
     resoudreOngletDepuisChaine(page);
   }, [searchParams, router, definirOngletActif, resoudreOngletDepuisChaine]);
 
@@ -118,21 +130,16 @@ export function CoquilleApplication() {
 
   const margeGauche = estLarge ? (menuOuvert ? 260 : 72) : 0;
 
-  const declencherNouvelleDemande = () => {
-    if (ongletActif === "mes-conges" || ongletActif === "conges") {
-      setImpulsionConge((c) => c + 1);
-    }
-    if (ongletActif === "mes-documents" || ongletActif === "documents") {
-      setImpulsionDocument((c) => c + 1);
-    }
-  };
-
-  if (!pret) {
+  if (!zustandPret) {
     return <ChargeurPleinEcran />;
   }
 
+  if (!introPret) {
+    return <ChargeurPleinEcran texte="MUFER Employés" />;
+  }
+
   if (!estAuthentifie) {
-    return <ChargeurPleinEcran texte="Redirection…" />;
+    return <ChargeurPleinEcran texte="MUFER Employés" />;
   }
 
   if (!utilisateur) {
@@ -146,11 +153,10 @@ export function CoquilleApplication() {
       <EnteteApplication
         margeGauche={margeGauche}
         surMenuMobile={() => setMenuMobile(true)}
-        surNouvelleDemande={declencherNouvelleDemande}
       />
       <motion.main
         layout
-        className="min-h-screen px-3 pb-16 pt-20 sm:px-6"
+        className="min-h-screen px-2.5 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20"
         style={{ marginLeft: margeGauche }}
       >
         <AnimatePresence mode="wait">
@@ -166,6 +172,7 @@ export function CoquilleApplication() {
               role: utilisateur.role,
               impulsionConge,
               impulsionDocument,
+              impulsionAbsence,
             })}
           </motion.div>
         </AnimatePresence>

@@ -1,24 +1,24 @@
 "use client";
 
 import * as React from "react";
-import { format, parseISO, differenceInDays } from "date-fns";
+import { differenceInDays, format, isWithinInterval, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { 
-  Calendar, 
-  Check, 
-  Clock, 
-  Filter, 
-  LayoutGrid, 
-  LayoutList, 
-  MessageSquare, 
-  Search, 
-  User, 
+import { motion } from "framer-motion";
+import {
+  Calendar,
+  CalendarCheck,
+  Check,
+  Clock,
+  Filter,
+  MessageSquare,
+  Search,
+  User,
   X,
   FileText,
-  ChevronLeft,
-  ChevronRight
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { NombreAnime } from "@/components/metrique/nombre-anime";
+import { Pagination } from "@/components/ui/pagination";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { CalendrierConges } from "@/components/conges/calendrier-conges";
 import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libelles-conges";
 import { Bouton } from "@/components/ui/button";
@@ -35,9 +35,17 @@ import {
   TableauRangee,
 } from "@/components/ui/table";
 import { ZoneTexte } from "@/components/ui/textarea";
+import { ToggleVue, type ModeVue } from "@/components/ui/toggle-vue";
+import { ContenuDialogue, Dialogue, EnteteDialogue, TitreDialogue } from "@/components/ui/dialog";
 import { useConges, useMiseAJourCongeRh } from "@/hooks/queries/use-conges";
 import { useEmployes } from "@/hooks/queries/use-employes";
 import type { DemandeConge, StatutDemandeConge, TypeConge } from "@/types";
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
+const couleurAccentConges = "#d4a500";
+
+/** Masque le rectangle gris du survol Recharts (Tooltip). */
+const curseurInfobulleInvisible = { fillOpacity: 0, strokeOpacity: 0 };
 
 const ITEMS_PAR_PAGE = 6;
 
@@ -58,20 +66,29 @@ export function PageGestionCongesRh() {
   const { data: conges = [], isLoading } = useConges();
   const { data: employes = [] } = useEmployes();
   const mutation = useMiseAJourCongeRh();
-  
-  // Modal state
+
   const [modalOuverte, setModalOuverte] = useState(false);
   const [demandeSelectionnee, setDemandeSelectionnee] = useState<DemandeConge | null>(null);
   const [commentaireRh, setCommentaireRh] = useState("");
   const [noteInterneRh, setNoteInterneRh] = useState("");
   const [actionModal, setActionModal] = useState<"valider" | "refuser" | "traiter">("traiter");
 
-  // Filtres et recherche
   const [recherche, setRecherche] = useState("");
   const [filtreStatut, setFiltreStatut] = useState<StatutDemandeConge | "tous">("tous");
   const [filtreType, setFiltreType] = useState<TypeConge | "tous">("tous");
   const [pageCourante, setPageCourante] = useState(1);
-  const [vueMode, setVueMode] = useState<"tableau" | "grille">("grille");
+  const [modeVue, setModeVue] = useState<ModeVue>("tableau");
+  const [jourFiltreCalendrier, setJourFiltreCalendrier] = useState<Date | null>(null);
+  const refSectionListeDemandes = useRef<HTMLDivElement>(null);
+
+  const selectionnerJourCalendrier = useCallback((jour: Date | null) => {
+    setJourFiltreCalendrier(jour);
+    if (jour) {
+      requestAnimationFrame(() => {
+        refSectionListeDemandes.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, []);
 
   const parEmploye = useMemo(() => {
     const map = new Map<string, { nom: string; poste?: string }>();
@@ -79,7 +96,6 @@ export function PageGestionCongesRh() {
     return map;
   }, [employes]);
 
-  // Filtrage des conges
   const congesFiltres = useMemo(() => {
     return conges.filter((d) => {
       const nomEmploye = parEmploye.get(d.employeId)?.nom.toLowerCase() ?? "";
@@ -92,21 +108,30 @@ export function PageGestionCongesRh() {
       const matchStatut = filtreStatut === "tous" || d.statut === filtreStatut;
       const matchType = filtreType === "tous" || d.type === filtreType;
 
-      return matchRecherche && matchStatut && matchType;
-    });
-  }, [conges, recherche, filtreStatut, filtreType, parEmploye]);
+      let matchJour = true;
+      if (jourFiltreCalendrier) {
+        try {
+          matchJour = isWithinInterval(jourFiltreCalendrier, {
+            start: parseISO(d.dateDebut),
+            end: parseISO(d.dateFin),
+          });
+        } catch {
+          matchJour = false;
+        }
+      }
 
-  // Pagination
-  const totalPages = Math.ceil(congesFiltres.length / ITEMS_PAR_PAGE);
+      return matchRecherche && matchStatut && matchType && matchJour;
+    });
+  }, [conges, recherche, filtreStatut, filtreType, jourFiltreCalendrier, parEmploye]);
+
   const congesPagines = useMemo(() => {
     const debut = (pageCourante - 1) * ITEMS_PAR_PAGE;
     return congesFiltres.slice(debut, debut + ITEMS_PAR_PAGE);
   }, [congesFiltres, pageCourante]);
 
-  // Reset page quand filtre change
   React.useEffect(() => {
     setPageCourante(1);
-  }, [recherche, filtreStatut, filtreType]);
+  }, [recherche, filtreStatut, filtreType, jourFiltreCalendrier]);
 
   const ouvrirModal = (demande: DemandeConge, action: "valider" | "refuser" | "traiter") => {
     setDemandeSelectionnee(demande);
@@ -125,11 +150,9 @@ export function PageGestionCongesRh() {
 
   const confirmerAction = async () => {
     if (!demandeSelectionnee) return;
-    
-    const nouveauStatut: StatutDemandeConge = 
-      actionModal === "valider" ? "valide" : 
-      actionModal === "refuser" ? "refuse" : 
-      demandeSelectionnee.statut;
+
+    const nouveauStatut: StatutDemandeConge =
+      actionModal === "valider" ? "valide" : actionModal === "refuser" ? "refuse" : demandeSelectionnee.statut;
 
     await mutation.mutateAsync({
       id: demandeSelectionnee.id,
@@ -137,7 +160,7 @@ export function PageGestionCongesRh() {
       noteInterneRh,
       statut: nouveauStatut,
     });
-    
+
     fermerModal();
   };
 
@@ -162,30 +185,165 @@ export function PageGestionCongesRh() {
     return differenceInDays(parseISO(fin), parseISO(debut)) + 1;
   };
 
+  const statsConges = useMemo(() => {
+    const enAttente = conges.filter((c) => c.statut === "en_attente").length;
+    const valides = conges.filter((c) => c.statut === "valide").length;
+    const refuses = conges.filter((c) => c.statut === "refuse").length;
+    return { enAttente, valides, refuses };
+  }, [conges]);
+
+  const donneesGraphiqueStats = useMemo(
+    () =>
+      [
+        { statut: "en_attente" as const, nom: "En attente", valeur: statsConges.enAttente },
+        { statut: "valide" as const, nom: "Valides", valeur: statsConges.valides },
+        { statut: "refuse" as const, nom: "Refusés", valeur: statsConges.refuses },
+      ] as const,
+    [statsConges.enAttente, statsConges.valides, statsConges.refuses],
+  );
+
+  const couleurBarreStatut = (statut: "en_attente" | "valide" | "refuse") => {
+    if (statut === "valide") return "#22c55e";
+    if (statut === "refuse") return "#ef4444";
+    return couleurAccentConges;
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Modal de traitement */}
-      {modalOuverte && demandeSelectionnee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-[var(--bordure)] bg-[var(--surface-elevee)] shadow-2xl">
-            <div className="border-b border-[var(--bordure)] p-5">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-[var(--texte-principal)]">
-                  {actionModal === "valider" && "Valider la demande"}
-                  {actionModal === "refuser" && "Refuser la demande"}
-                  {actionModal === "traiter" && "Traiter la demande"}
-                </h2>
-                <button 
-                  onClick={fermerModal}
-                  className="rounded-lg p-2 text-[var(--texte-secondaire)] hover:bg-[var(--surface-mute)] hover:text-[var(--texte-principal)]"
-                >
-                  <X className="size-5" />
-                </button>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:gap-4 xl:gap-6 xl:flex-row xl:items-stretch">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 sm:gap-4">
+          <div className="grid shrink-0 grid-cols-1 gap-2.5 sm:gap-4 sm:grid-cols-3">
+            <motion.div
+              className="min-h-0"
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <Carte className="relative flex h-full min-h-[6rem] overflow-hidden border-l-2 border-l-[var(--accent-principal)] sm:min-h-[7.25rem]">
+                <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-[var(--accent-principal)]/12 blur-2xl" />
+                <CarteContenu className="flex flex-1 items-center gap-3 p-3 sm:gap-4 sm:p-4">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15 sm:size-12 sm:rounded-2xl">
+                    <Clock className="size-5 text-[var(--accent-principal)] sm:size-6" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-[var(--texte-secondaire)] sm:text-sm">En attente</p>
+                    <p className="text-xl font-bold tabular-nums text-[var(--accent-principal)] sm:text-2xl md:text-3xl">
+                      <NombreAnime valeur={statsConges.enAttente} />
+                    </p>
+                  </div>
+                </CarteContenu>
+              </Carte>
+            </motion.div>
+
+            <motion.div
+              className="min-h-0"
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <Carte className="relative flex h-full min-h-[6rem] overflow-hidden border-l-2 border-l-emerald-500 sm:min-h-[7.25rem]">
+                <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-emerald-500/12 blur-2xl" />
+                <CarteContenu className="flex flex-1 items-center gap-3 p-3 sm:gap-4 sm:p-4">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 sm:size-12 sm:rounded-2xl">
+                    <CalendarCheck className="size-5 text-emerald-600 sm:size-6" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-[var(--texte-secondaire)] sm:text-sm">Valides</p>
+                    <p className="text-xl font-bold tabular-nums text-emerald-600 sm:text-2xl md:text-3xl">
+                      <NombreAnime valeur={statsConges.valides} />
+                    </p>
+                  </div>
+                </CarteContenu>
+              </Carte>
+            </motion.div>
+
+            <motion.div
+              className="min-h-0"
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <Carte className="relative flex h-full min-h-[6rem] overflow-hidden border-l-2 border-l-red-500 sm:min-h-[7.25rem]">
+                <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-red-500/12 blur-2xl" />
+                <CarteContenu className="flex flex-1 items-center gap-3 p-3 sm:gap-4 sm:p-4">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500/15 sm:size-12 sm:rounded-2xl">
+                    <X className="size-5 text-red-600 sm:size-6" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-[var(--texte-secondaire)] sm:text-sm">Refusés</p>
+                    <p className="text-xl font-bold tabular-nums text-red-600 sm:text-2xl md:text-3xl">
+                      <NombreAnime valeur={statsConges.refuses} />
+                    </p>
+                  </div>
+                </CarteContenu>
+              </Carte>
+            </motion.div>
+          </div>
+
+          <Carte className="flex max-xl:min-h-[18rem] flex-1 flex-col overflow-hidden xl:min-h-0">
+            <CarteEntete className="shrink-0 pb-3 pt-5">
+              <CarteTitre className="text-lg">Repartition des demandes</CarteTitre>
+              <CarteDescription>Memes totaux que les trois indicateurs du dessus</CarteDescription>
+            </CarteEntete>
+            <CarteContenu className="flex min-h-0 flex-1 flex-col px-5 pb-5 pt-0">
+              <div className="min-h-0 w-full flex-1 max-xl:min-h-[12rem]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={[...donneesGraphiqueStats]} margin={{ top: 12, right: 12, left: 4, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--bordure)" vertical={false} />
+                    <XAxis
+                      dataKey="nom"
+                      tick={{ fontSize: 12 }}
+                      stroke="var(--texte-secondaire)"
+                      interval={0}
+                      tickMargin={10}
+                    />
+                    <YAxis allowDecimals={false} width={36} tick={{ fontSize: 11 }} stroke="var(--texte-secondaire)" />
+                    <Tooltip
+                      cursor={curseurInfobulleInvisible}
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "1px solid var(--bordure)",
+                        background: "var(--surface-elevee)",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      }}
+                      labelStyle={{ color: "var(--texte-principal)" }}
+                    />
+                    <Bar dataKey="valeur" name="Demandes" radius={[8, 8, 0, 0]} maxBarSize={88}>
+                      {donneesGraphiqueStats.map((e) => (
+                        <Cell key={e.statut} fill={couleurBarreStatut(e.statut)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            </div>
-            
-            <div className="space-y-4 p-5">
-              {/* Info demande */}
+            </CarteContenu>
+          </Carte>
+        </div>
+
+        <div className="flex shrink-0 xl:h-full xl:min-h-0 xl:w-[380px] xl:self-stretch">
+          <CalendrierConges
+            demandes={conges}
+            compact
+            className="h-full min-h-0"
+            jourSelectionne={jourFiltreCalendrier}
+            onSelectionnerJour={selectionnerJourCalendrier}
+          />
+        </div>
+      </div>
+
+      <Dialogue
+        open={Boolean(modalOuverte && demandeSelectionnee)}
+        onOpenChange={(ouvert) => {
+          if (!ouvert) fermerModal();
+        }}
+      >
+        {demandeSelectionnee && (
+          <ContenuDialogue className="max-h-[85vh] max-w-lg overflow-y-auto">
+            <EnteteDialogue>
+              <TitreDialogue>
+                {actionModal === "valider" && "Valider la demande"}
+                {actionModal === "refuser" && "Refuser la demande"}
+                {actionModal === "traiter" && "Traiter la demande"}
+              </TitreDialogue>
+            </EnteteDialogue>
+            <div className="grid gap-4 pt-2">
               <div className="rounded-xl bg-[var(--surface-mute)] p-4">
                 <div className="mb-2 flex items-center gap-2">
                   <User className="size-4 text-[var(--accent-principal)]" />
@@ -200,12 +358,15 @@ export function PageGestionCongesRh() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="size-3" />
-                    <span>{calculerJours(demandeSelectionnee.dateDebut, demandeSelectionnee.dateFin)} jour(s)</span>
+                    <span>
+                      {calculerJours(demandeSelectionnee.dateDebut, demandeSelectionnee.dateFin)} jour(s)
+                    </span>
                   </div>
                   <div className="col-span-2 flex items-center gap-2">
                     <Clock className="size-3" />
                     <span>
-                      {format(parseISO(demandeSelectionnee.dateDebut), "d MMM", { locale: fr })} - {format(parseISO(demandeSelectionnee.dateFin), "d MMM yyyy", { locale: fr })}
+                      {format(parseISO(demandeSelectionnee.dateDebut), "d MMM", { locale: fr })} -{" "}
+                      {format(parseISO(demandeSelectionnee.dateFin), "d MMM yyyy", { locale: fr })}
                     </span>
                   </div>
                 </div>
@@ -215,8 +376,6 @@ export function PageGestionCongesRh() {
                   </p>
                 )}
               </div>
-
-              {/* Commentaire RH */}
               <div className="space-y-2">
                 <Etiquette htmlFor="commentaire-rh">Commentaire pour l&apos;employe</Etiquette>
                 <ZoneTexte
@@ -227,8 +386,6 @@ export function PageGestionCongesRh() {
                   placeholder="Ce commentaire sera visible par l'employe..."
                 />
               </div>
-
-              {/* Note interne */}
               <div className="space-y-2">
                 <Etiquette htmlFor="note-interne">Note interne RH</Etiquette>
                 <ZoneTexte
@@ -239,61 +396,45 @@ export function PageGestionCongesRh() {
                   placeholder="Note interne (non visible par l'employe)..."
                 />
               </div>
+              <div className="flex justify-end gap-3 border-t border-[var(--bordure)] pt-4">
+                <Bouton type="button" variante="secondaire" onClick={fermerModal}>
+                  Annuler
+                </Bouton>
+                <Bouton
+                  type="button"
+                  onClick={() => void confirmerAction()}
+                  disabled={mutation.isPending}
+                  variante={actionModal === "refuser" ? "destructif" : "defaut"}
+                >
+                  {mutation.isPending
+                    ? "En cours..."
+                    : actionModal === "valider"
+                      ? "Valider"
+                      : actionModal === "refuser"
+                        ? "Refuser"
+                        : "Enregistrer"}
+                </Bouton>
+              </div>
             </div>
+          </ContenuDialogue>
+        )}
+      </Dialogue>
 
-            <div className="flex items-center justify-end gap-3 border-t border-[var(--bordure)] p-5">
-              <Bouton variante="fantome" onClick={fermerModal}>
-                Annuler
-              </Bouton>
-              <Bouton 
-                onClick={() => void confirmerAction()}
-                disabled={mutation.isPending}
-                variante={actionModal === "refuser" ? "danger" : "defaut"}
-              >
-                {mutation.isPending ? "En cours..." : (
-                  actionModal === "valider" ? "Valider" :
-                  actionModal === "refuser" ? "Refuser" :
-                  "Enregistrer"
-                )}
-              </Bouton>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <div ref={refSectionListeDemandes} className="grid scroll-mt-20 gap-3 sm:gap-4 lg:gap-6">
         <Carte>
           <CarteEntete>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CarteTitre>Demandes de conges</CarteTitre>
                 <CarteDescription>
-                  {congesFiltres.length} demande{congesFiltres.length > 1 ? "s" : ""} 
+                  {congesFiltres.length} demande{congesFiltres.length > 1 ? "s" : ""}
                   {filtreStatut === "en_attente" && " en attente de traitement"}
                 </CarteDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <Bouton
-                  taille="icone"
-                  variante={vueMode === "tableau" ? "defaut" : "fantome"}
-                  onClick={() => setVueMode("tableau")}
-                  aria-label="Vue tableau"
-                >
-                  <LayoutList className="size-4" />
-                </Bouton>
-                <Bouton
-                  taille="icone"
-                  variante={vueMode === "grille" ? "defaut" : "fantome"}
-                  onClick={() => setVueMode("grille")}
-                  aria-label="Vue grille"
-                >
-                  <LayoutGrid className="size-4" />
-                </Bouton>
-              </div>
+              <ToggleVue mode={modeVue} onChangerMode={setModeVue} />
             </div>
           </CarteEntete>
           <CarteContenu className="space-y-4">
-            {/* Barre de recherche et filtres */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--texte-secondaire)]" />
@@ -306,6 +447,7 @@ export function PageGestionCongesRh() {
                 />
                 {recherche && (
                   <button
+                    type="button"
                     onClick={() => setRecherche("")}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--texte-secondaire)] hover:text-[var(--texte-principal)]"
                   >
@@ -337,6 +479,21 @@ export function PageGestionCongesRh() {
                     </option>
                   ))}
                 </select>
+                {jourFiltreCalendrier && (
+                  <Bouton
+                    type="button"
+                    variante="fantome"
+                    taille="sm"
+                    className="shrink-0 gap-1 text-[var(--texte-secondaire)]"
+                    onClick={() => setJourFiltreCalendrier(null)}
+                  >
+                    <X className="size-3.5" />
+                    <span className="hidden sm:inline">
+                      Jour&nbsp;: {format(jourFiltreCalendrier, "d MMM yyyy", { locale: fr })}
+                    </span>
+                    <span className="sm:hidden">Jour</span>
+                  </Bouton>
+                )}
               </div>
             </div>
 
@@ -346,8 +503,7 @@ export function PageGestionCongesRh() {
                 <Squelette className="h-24 w-full rounded-xl" />
                 <Squelette className="h-24 w-full rounded-xl" />
               </div>
-            ) : vueMode === "grille" ? (
-              /* Vue Grille */
+            ) : modeVue === "grille" ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 {congesPagines.length === 0 ? (
                   <div className="col-span-full py-12 text-center text-[var(--texte-secondaire)]">
@@ -357,25 +513,20 @@ export function PageGestionCongesRh() {
                   congesPagines.map((d) => {
                     const emp = parEmploye.get(d.employeId);
                     const nbJours = calculerJours(d.dateDebut, d.dateFin);
-                    
+
                     return (
                       <div
                         key={d.id}
                         className="rounded-xl border border-[var(--bordure)] bg-[var(--fond-base)] p-4 transition-all hover:border-[var(--accent-principal)]/30 hover:shadow-md"
                       >
-                        {/* Header */}
                         <div className="mb-3 flex items-start justify-between">
                           <div className="flex items-center gap-3">
                             <div className="flex size-10 items-center justify-center rounded-full bg-[var(--accent-principal)]/10 text-[var(--accent-principal)]">
                               <User className="size-5" />
                             </div>
                             <div>
-                              <p className="font-semibold text-[var(--texte-principal)]">
-                                {emp?.nom ?? d.employeId}
-                              </p>
-                              {emp?.poste && (
-                                <p className="text-xs text-[var(--texte-secondaire)]">{emp.poste}</p>
-                              )}
+                              <p className="font-semibold text-[var(--texte-principal)]">{emp?.nom ?? d.employeId}</p>
+                              {emp?.poste && <p className="text-xs text-[var(--texte-secondaire)]">{emp.poste}</p>}
                             </div>
                           </div>
                           <Pastille ton={pastilleStatut(d.statut)} className="flex items-center gap-1">
@@ -384,7 +535,6 @@ export function PageGestionCongesRh() {
                           </Pastille>
                         </div>
 
-                        {/* Infos */}
                         <div className="mb-3 space-y-2 rounded-lg bg-[var(--surface-mute)] p-3">
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-[var(--texte-secondaire)]">Type</span>
@@ -392,12 +542,15 @@ export function PageGestionCongesRh() {
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-[var(--texte-secondaire)]">Duree</span>
-                            <span className="font-medium text-[var(--texte-principal)]">{nbJours} jour{nbJours > 1 ? "s" : ""}</span>
+                            <span className="font-medium text-[var(--texte-principal)]">
+                              {nbJours} jour{nbJours > 1 ? "s" : ""}
+                            </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-[var(--texte-secondaire)]">Periode</span>
                             <span className="text-xs text-[var(--texte-principal)]">
-                              {format(parseISO(d.dateDebut), "d MMM", { locale: fr })} - {format(parseISO(d.dateFin), "d MMM", { locale: fr })}
+                              {format(parseISO(d.dateDebut), "d MMM", { locale: fr })} -{" "}
+                              {format(parseISO(d.dateFin), "d MMM", { locale: fr })}
                             </span>
                           </div>
                         </div>
@@ -408,7 +561,6 @@ export function PageGestionCongesRh() {
                           </p>
                         )}
 
-                        {/* Actions */}
                         <div className="flex items-center gap-2">
                           {d.statut === "en_attente" ? (
                             <>
@@ -416,6 +568,7 @@ export function PageGestionCongesRh() {
                                 taille="sm"
                                 variante="defaut"
                                 className="flex-1"
+                                disabled={mutation.isPending}
                                 onClick={() => ouvrirModal(d, "valider")}
                               >
                                 <Check className="size-4" />
@@ -423,8 +576,9 @@ export function PageGestionCongesRh() {
                               </Bouton>
                               <Bouton
                                 taille="sm"
-                                variante="danger"
+                                variante="destructif"
                                 className="flex-1"
+                                disabled={mutation.isPending}
                                 onClick={() => ouvrirModal(d, "refuser")}
                               >
                                 <X className="size-4" />
@@ -436,6 +590,7 @@ export function PageGestionCongesRh() {
                               taille="sm"
                               variante="secondaire"
                               className="w-full"
+                              disabled={mutation.isPending}
                               onClick={() => ouvrirModal(d, "traiter")}
                             >
                               <MessageSquare className="size-4" />
@@ -449,7 +604,6 @@ export function PageGestionCongesRh() {
                 )}
               </div>
             ) : (
-              /* Vue Tableau */
               <Tableau>
                 <TableauEntete>
                   <TableauRangee>
@@ -472,26 +626,21 @@ export function PageGestionCongesRh() {
                     congesPagines.map((d) => {
                       const emp = parEmploye.get(d.employeId);
                       const nbJours = calculerJours(d.dateDebut, d.dateFin);
-                      
+
                       return (
                         <TableauRangee key={d.id} className="hover:bg-[var(--surface-mute)]/50">
                           <TableauCellule>
                             <div>
-                              <p className="font-medium text-[var(--texte-principal)]">
-                                {emp?.nom ?? d.employeId}
-                              </p>
-                              {emp?.poste && (
-                                <p className="text-xs text-[var(--texte-secondaire)]">{emp.poste}</p>
-                              )}
+                              <p className="font-medium text-[var(--texte-principal)]">{emp?.nom ?? d.employeId}</p>
+                              {emp?.poste && <p className="text-xs text-[var(--texte-secondaire)]">{emp.poste}</p>}
                             </div>
                           </TableauCellule>
                           <TableauCellule>{libelleTypeConge(d.type)}</TableauCellule>
                           <TableauCellule className="whitespace-nowrap text-sm">
-                            {format(parseISO(d.dateDebut), "d MMM", { locale: fr })} - {format(parseISO(d.dateFin), "d MMM", { locale: fr })}
+                            {format(parseISO(d.dateDebut), "d MMM", { locale: fr })} -{" "}
+                            {format(parseISO(d.dateFin), "d MMM", { locale: fr })}
                           </TableauCellule>
-                          <TableauCellule className="text-center font-medium">
-                            {nbJours}
-                          </TableauCellule>
+                          <TableauCellule className="text-center font-medium">{nbJours}</TableauCellule>
                           <TableauCellule>
                             <Pastille ton={pastilleStatut(d.statut)} className="flex w-fit items-center gap-1">
                               {getStatutIcon(d.statut)}
@@ -505,6 +654,7 @@ export function PageGestionCongesRh() {
                                   <Bouton
                                     taille="sm"
                                     variante="defaut"
+                                    disabled={mutation.isPending}
                                     onClick={() => ouvrirModal(d, "valider")}
                                   >
                                     <Check className="size-3" />
@@ -512,7 +662,8 @@ export function PageGestionCongesRh() {
                                   </Bouton>
                                   <Bouton
                                     taille="sm"
-                                    variante="danger"
+                                    variante="destructif"
+                                    disabled={mutation.isPending}
                                     onClick={() => ouvrirModal(d, "refuser")}
                                   >
                                     <X className="size-3" />
@@ -523,6 +674,7 @@ export function PageGestionCongesRh() {
                                 <Bouton
                                   taille="sm"
                                   variante="secondaire"
+                                  disabled={mutation.isPending}
                                   onClick={() => ouvrirModal(d, "traiter")}
                                 >
                                   <MessageSquare className="size-3" />
@@ -539,58 +691,19 @@ export function PageGestionCongesRh() {
               </Tableau>
             )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-[var(--bordure)] pt-4">
-                <p className="text-sm text-[var(--texte-secondaire)]">
-                  Page {pageCourante} sur {totalPages}
-                </p>
-                <div className="flex items-center gap-1">
-                  <Bouton
-                    taille="icone"
-                    variante="fantome"
-                    onClick={() => setPageCourante((p) => Math.max(1, p - 1))}
-                    disabled={pageCourante === 1}
-                  >
-                    <ChevronLeft className="size-4" />
-                  </Bouton>
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let page: number;
-                    if (totalPages <= 5) {
-                      page = i + 1;
-                    } else if (pageCourante <= 3) {
-                      page = i + 1;
-                    } else if (pageCourante >= totalPages - 2) {
-                      page = totalPages - 4 + i;
-                    } else {
-                      page = pageCourante - 2 + i;
-                    }
-                    return (
-                      <Bouton
-                        key={page}
-                        taille="icone"
-                        variante={page === pageCourante ? "defaut" : "fantome"}
-                        onClick={() => setPageCourante(page)}
-                      >
-                        {page}
-                      </Bouton>
-                    );
-                  })}
-                  <Bouton
-                    taille="icone"
-                    variante="fantome"
-                    onClick={() => setPageCourante((p) => Math.min(totalPages, p + 1))}
-                    disabled={pageCourante === totalPages}
-                  >
-                    <ChevronRight className="size-4" />
-                  </Bouton>
-                </div>
+            {congesFiltres.length > 0 && (
+              <div className="border-t border-[var(--bordure)]/50 pt-4">
+                <Pagination
+                  pageActuelle={pageCourante}
+                  totalPages={Math.max(1, Math.ceil(congesFiltres.length / ITEMS_PAR_PAGE))}
+                  onChangerPage={setPageCourante}
+                  nombreElementsTotal={congesFiltres.length}
+                  taillePage={ITEMS_PAR_PAGE}
+                />
               </div>
             )}
           </CarteContenu>
         </Carte>
-
-        <CalendrierConges demandes={conges} />
       </div>
     </div>
   );

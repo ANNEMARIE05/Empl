@@ -10,9 +10,35 @@ interface PaginationProps {
   totalPages: number;
   onChangerPage: (page: number) => void;
   className?: string;
+  /** Avec `taillePage`, affiche « Affichage x–y sur n » (y compris une seule page). */
+  nombreElementsTotal?: number;
+  taillePage?: number;
 }
 
-export function Pagination({ pageActuelle, totalPages, onChangerPage, className }: PaginationProps) {
+export function Pagination({
+  pageActuelle,
+  totalPages,
+  onChangerPage,
+  className,
+  nombreElementsTotal,
+  taillePage,
+}: PaginationProps) {
+  const decompteActif =
+    nombreElementsTotal !== undefined &&
+    taillePage !== undefined &&
+    nombreElementsTotal > 0 &&
+    taillePage > 0;
+
+  const texteDecompte = decompteActif
+    ? (() => {
+        const debut = (pageActuelle - 1) * taillePage + 1;
+        const fin = Math.min(pageActuelle * taillePage, nombreElementsTotal);
+        return `Affichage ${debut}–${fin} sur ${nombreElementsTotal}`;
+      })()
+    : null;
+
+  if (totalPages < 1) return null;
+
   const genererNumeros = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
@@ -39,10 +65,22 @@ export function Pagination({ pageActuelle, totalPages, onChangerPage, className 
     return pages;
   };
 
-  if (totalPages <= 1) return null;
+  // Une seule page : même bandeau (décompte + contrôles désactivés) qu'avec plusieurs pages
+  if (totalPages === 1 && !texteDecompte) {
+    return null;
+  }
 
   return (
-    <div className={cn("flex items-center justify-center gap-1", className)}>
+    <div
+      className={cn(
+        "flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between",
+        className,
+      )}
+    >
+      {texteDecompte ? (
+        <p className="text-sm text-[var(--texte-secondaire)] sm:order-first">{texteDecompte}</p>
+      ) : null}
+      <div className="flex items-center justify-center gap-1 sm:justify-end">
       <Bouton
         variante="fantome"
         taille="icone"
@@ -103,6 +141,7 @@ export function Pagination({ pageActuelle, totalPages, onChangerPage, className 
       >
         <ChevronsRight className="size-4" />
       </Bouton>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
-import { Users, Plus, Eye, Pencil, Trash2, Mail, Building, Briefcase } from "lucide-react";
-import { format } from "date-fns";
+import { urlPhotoProfil } from "@/lib/url-photo-profil";
+import { Users, Plus, Eye, Pencil, Trash2, Mail, Building, Briefcase, CalendarDays } from "lucide-react";
+import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libelles-conges";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
-import { Pastille } from "@/components/ui/badge";
+import { Pastille, type PastilleProps } from "@/components/ui/badge";
 import { Squelette } from "@/components/ui/skeleton";
 import { Bouton } from "@/components/ui/button";
 import { Entree } from "@/components/ui/input";
@@ -31,8 +33,9 @@ import { BarreRecherche } from "@/components/ui/barre-recherche";
 import { FiltreSelect } from "@/components/ui/filtre-select";
 import { Pagination } from "@/components/ui/pagination";
 import { ToggleVue, type ModeVue } from "@/components/ui/toggle-vue";
+import { useConges } from "@/hooks/queries/use-conges";
 import { useEmployes, useCreerEmploye, useModifierEmploye, useSupprimerEmploye } from "@/hooks/queries/use-employes";
-import type { Employe, RoleUtilisateur } from "@/types";
+import type { Employe, RoleUtilisateur, StatutDemandeConge } from "@/types";
 
 function libelleRole(role: string) {
   if (role === "rh") return "RH";
@@ -55,6 +58,16 @@ const optionsDepartement = [
 ];
 
 const ELEMENTS_PAR_PAGE = 6;
+
+/** Taille de page des sous-tableaux detail employe (aligne sur Historique des actions). */
+const ELEMENTS_PAR_PAGE_DETAIL = 5;
+
+function pastilleStatutCongeRapide(statut: StatutDemandeConge): NonNullable<PastilleProps["ton"]> {
+  if (statut === "valide") return "succes";
+  if (statut === "refuse" || statut === "annule") return "danger";
+  if (statut === "en_attente") return "alerte";
+  return "neutre";
+}
 
 interface FormulaireEmployeProps {
   employe?: Employe | null;
@@ -185,18 +198,37 @@ interface DetailEmployeProps {
 }
 
 function DetailEmploye({ employe, onFermer }: DetailEmployeProps) {
+  const { data: tousConges = [], isLoading: chargementConges } = useConges();
+  const [pageConges, setPageConges] = useState(1);
+
+  useEffect(() => {
+    setPageConges(1);
+  }, [employe.id]);
+
+  const congesEmploye = useMemo(
+    () =>
+      [...tousConges]
+        .filter((c) => c.employeId === employe.id)
+        .sort((a, b) => parseISO(b.creeLe).getTime() - parseISO(a.creeLe).getTime()),
+    [tousConges, employe.id]
+  );
+
+  const congesPaginees = useMemo(() => {
+    const debut = (pageConges - 1) * ELEMENTS_PAR_PAGE_DETAIL;
+    return congesEmploye.slice(debut, debut + ELEMENTS_PAR_PAGE_DETAIL);
+  }, [congesEmploye, pageConges]);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center gap-4">
         <div className="relative size-20 overflow-hidden rounded-2xl border border-[var(--bordure)] bg-[var(--surface-mute)]">
-          {employe.photoUrl ? (
-            <Image src={employe.photoUrl} alt="" fill className="object-cover" sizes="80px" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-[var(--texte-secondaire)]">
-              {employe.prenom[0]}
-              {employe.nom[0]}
-            </div>
-          )}
+          <Image
+            src={urlPhotoProfil(employe.photoUrl, employe.role)}
+            alt={`${employe.prenom} ${employe.nom}`}
+            fill
+            className="object-cover"
+            sizes="80px"
+          />
         </div>
         <div>
           <h3 className="text-xl font-bold">
@@ -241,7 +273,68 @@ function DetailEmploye({ employe, onFermer }: DetailEmployeProps) {
         </div>
       </div>
 
-      <div className="flex justify-end pt-2">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15">
+            <CalendarDays className="size-4 text-[var(--accent-principal)]" />
+          </div>
+          <h4 className="text-sm font-semibold text-[var(--texte-principal)]">
+            Demandes de conges
+            {!chargementConges && (
+              <span className="ml-1.5 font-normal text-[var(--texte-secondaire)]">
+                ({congesEmploye.length})
+              </span>
+            )}
+          </h4>
+        </div>
+        {chargementConges ? (
+          <div className="space-y-2">
+            <Squelette className="h-10 w-full rounded-lg" />
+            <Squelette className="h-10 w-full rounded-lg" />
+          </div>
+        ) : congesEmploye.length === 0 ? (
+          <p className="flex items-center justify-center rounded-xl border border-[var(--bordure)]/50 bg-[var(--surface-mute)]/50 px-3 py-8 text-2xl font-semibold tabular-nums text-[var(--texte-principal)]">
+            {congesEmploye.length}
+          </p>
+        ) : (
+          <>
+            <Tableau>
+              <TableauEntete>
+                <TableauRangee>
+                  <TableauCelluleEntete>Type</TableauCelluleEntete>
+                  <TableauCelluleEntete>Periode</TableauCelluleEntete>
+                  <TableauCelluleEntete>Statut</TableauCelluleEntete>
+                </TableauRangee>
+              </TableauEntete>
+              <TableauCorps>
+                {congesPaginees.map((c) => (
+                  <TableauRangee key={c.id} className="ligne-liste-luxe">
+                    <TableauCellule className="font-medium">{libelleTypeConge(c.type)}</TableauCellule>
+                    <TableauCellule className="whitespace-nowrap text-xs">
+                      {format(parseISO(c.dateDebut), "d MMM", { locale: fr })} →{" "}
+                      {format(parseISO(c.dateFin), "d MMM yyyy", { locale: fr })}
+                    </TableauCellule>
+                    <TableauCellule>
+                      <Pastille ton={pastilleStatutCongeRapide(c.statut)}>{libelleStatutConge(c.statut)}</Pastille>
+                    </TableauCellule>
+                  </TableauRangee>
+                ))}
+              </TableauCorps>
+            </Tableau>
+            <div className="border-t border-[var(--bordure)]/50 pt-4">
+              <Pagination
+                pageActuelle={pageConges}
+                totalPages={Math.max(1, Math.ceil(congesEmploye.length / ELEMENTS_PAR_PAGE_DETAIL))}
+                onChangerPage={setPageConges}
+                nombreElementsTotal={congesEmploye.length}
+                taillePage={ELEMENTS_PAR_PAGE_DETAIL}
+              />
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="flex justify-end border-t border-[var(--bordure)]/50 pt-4">
         <Bouton variante="secondaire" onClick={onFermer}>
           Fermer
         </Bouton>
@@ -279,7 +372,6 @@ export function ListeEmployes() {
     });
   }, [employes, recherche, filtreRole, filtreDepartement]);
 
-  const totalPages = Math.ceil(donneesFiltrees.length / ELEMENTS_PAR_PAGE);
   const donneesPaginees = donneesFiltrees.slice(
     (page - 1) * ELEMENTS_PAR_PAGE,
     page * ELEMENTS_PAR_PAGE
@@ -345,7 +437,7 @@ export function ListeEmployes() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
@@ -438,14 +530,13 @@ export function ListeEmployes() {
                   <TableauRangee key={e.id} className="group ligne-liste-luxe">
                     <TableauCellule>
                       <div className="relative size-10 overflow-hidden rounded-xl border border-[var(--bordure)]/50 bg-[var(--surface-mute)] transition-transform group-hover:scale-105">
-                        {e.photoUrl ? (
-                          <Image src={e.photoUrl} alt="" fill className="object-cover" sizes="40px" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xs font-bold text-[var(--texte-secondaire)]">
-                            {e.prenom[0]}
-                            {e.nom[0]}
-                          </div>
-                        )}
+                        <Image
+                          src={urlPhotoProfil(e.photoUrl, e.role)}
+                          alt={`${e.prenom} ${e.nom}`}
+                          fill
+                          className="object-cover"
+                          sizes="40px"
+                        />
                       </div>
                     </TableauCellule>
                     <TableauCellule>
@@ -493,14 +584,13 @@ export function ListeEmployes() {
                 >
                   <div className="flex items-start gap-4">
                     <div className="relative size-14 flex-shrink-0 overflow-hidden rounded-xl border border-[var(--bordure)]/50 bg-[var(--surface-mute)]">
-                      {e.photoUrl ? (
-                        <Image src={e.photoUrl} alt="" fill className="object-cover" sizes="56px" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-lg font-bold text-[var(--texte-secondaire)]">
-                          {e.prenom[0]}
-                          {e.nom[0]}
-                        </div>
-                      )}
+                      <Image
+                        src={urlPhotoProfil(e.photoUrl, e.role)}
+                        alt={`${e.prenom} ${e.nom}`}
+                        fill
+                        className="object-cover"
+                        sizes="56px"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold truncate">
@@ -535,12 +625,15 @@ export function ListeEmployes() {
           )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4 border-t border-[var(--bordure)]/50">
-              <p className="text-xs text-[var(--texte-secondaire)]">
-                Page {page} sur {totalPages} ({donneesFiltrees.length} resultat{donneesFiltrees.length > 1 ? "s" : ""})
-              </p>
-              <Pagination pageActuelle={page} totalPages={totalPages} onChangerPage={setPage} />
+          {donneesFiltrees.length > 0 && (
+            <div className="border-t border-[var(--bordure)]/50 pt-4">
+              <Pagination
+                pageActuelle={page}
+                totalPages={Math.max(1, Math.ceil(donneesFiltrees.length / ELEMENTS_PAR_PAGE))}
+                onChangerPage={setPage}
+                nombreElementsTotal={donneesFiltrees.length}
+                taillePage={ELEMENTS_PAR_PAGE}
+              />
             </div>
           )}
         </CarteContenu>
@@ -548,7 +641,13 @@ export function ListeEmployes() {
 
       {/* Dialogues */}
       <Dialogue open={dialogueOuvert} onOpenChange={setDialogueOuvert}>
-        <ContenuDialogue className="max-w-xl">
+        <ContenuDialogue
+          className={
+            modeDialogue === "detail"
+              ? "max-h-[85vh] max-w-3xl overflow-y-auto"
+              : "max-w-xl"
+          }
+        >
           <EnteteDialogue>
             <TitreDialogue>
               {modeDialogue === "creer" && "Nouvel employe"}

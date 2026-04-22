@@ -24,6 +24,7 @@ export type TypeDocument =
   | "attestation_salaire"
   | "certificat_travail"
   | "rib"
+  | "fiche_paie"
   | "convention_stage"
   | "autre";
 

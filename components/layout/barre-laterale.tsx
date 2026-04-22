@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Bouton } from "@/components/ui/button";
 import { Pastille } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImageProfilUtilisateur } from "@/components/ui/image-profil-utilisateur";
 import {
   elementsMenuPrincipal,
   elementsMenuSecondaire,
@@ -98,29 +98,46 @@ export function BarreLaterale({
         "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-white/5 bg-gradient-to-b from-[var(--barre-laterale)] to-[#0a0a0a] text-[var(--barre-laterale-texte)] transition-[width] duration-300",
       )}
     >
-      <div className="flex h-16 items-center gap-3 border-b border-white/5 px-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--barre-laterale-accent)] to-[var(--barre-laterale-accent)]/80 text-sm font-black text-[var(--texte-sur-accent)] shadow-lg shadow-[var(--barre-laterale-accent)]/20">
+      <div
+        className={cn(
+          "flex shrink-0 border-b border-white/5",
+          menuOuvert
+            ? "h-16 flex-row items-center gap-3 px-4"
+            : "flex-col items-center gap-2 py-3 px-2",
+        )}
+      >
+        <div
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--barre-laterale-accent)] to-[var(--barre-laterale-accent)]/80 text-sm font-black text-[var(--texte-sur-accent)] shadow-lg shadow-[var(--barre-laterale-accent)]/20",
+            menuOuvert ? "size-10" : "size-9",
+          )}
+        >
           M
         </div>
         {menuOuvert && (
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-base font-bold tracking-tight">MUFER</p>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--barre-laterale-accent)]">
-              Gestion RH
+              EMPLOYES
             </p>
           </div>
         )}
         <button
           type="button"
           onClick={() => basculerMenu()}
-          className="ml-auto hidden rounded-lg border border-white/10 bg-white/5 p-1.5 text-[var(--barre-laterale-texte)] transition-colors hover:bg-white/10 lg:inline-flex"
+          className={cn(
+            "hidden rounded-lg border text-[var(--barre-laterale-texte)] transition-colors lg:inline-flex",
+            menuOuvert
+              ? "ml-auto border-white/10 bg-white/5 p-1.5 hover:bg-white/10"
+              : "border-[var(--barre-laterale-accent)]/40 bg-[var(--barre-laterale-accent)]/25 p-2 text-[var(--barre-laterale-accent)] shadow-md shadow-black/20 hover:border-[var(--barre-laterale-accent)]/60 hover:bg-[var(--barre-laterale-accent)]/35",
+          )}
           aria-label={menuOuvert ? "Replier le menu" : "Deplier le menu"}
         >
           {menuOuvert ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
         </button>
       </div>
 
-      <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-4">
+      <nav className="defilement-barre-laterale flex-1 space-y-2 overflow-y-auto px-3 py-4">
         {menuOuvert && (
           <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-white/40">
             Menu principal
@@ -202,15 +219,14 @@ export function BarreLaterale({
 
       <div className="border-t border-white/5 p-3">
         <div className={cn("flex items-center gap-3 rounded-xl bg-white/5 p-2", !menuOuvert && "flex-col bg-transparent p-0")}>
-          <Avatar className="size-10 ring-2 ring-white/10">
-            {utilisateur.photoUrl ? (
-              <AvatarImage src={utilisateur.photoUrl} alt="" />
-            ) : null}
-            <AvatarFallback className="bg-[var(--barre-laterale-accent)]/20 text-[var(--barre-laterale-accent)]">
-              {utilisateur.prenom[0]}
-              {utilisateur.nom[0]}
-            </AvatarFallback>
-          </Avatar>
+          <ImageProfilUtilisateur
+            photoUrl={utilisateur.photoUrl}
+            role={utilisateur.role}
+            prenom={utilisateur.prenom}
+            nom={utilisateur.nom}
+            taille="md"
+            className="ring-2 ring-white/10"
+          />
           {menuOuvert && (
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">
@@ -272,7 +288,7 @@ export function BarreLaterale({
                   {/* re-use nav by extracting - simplified: inline duplicate width */}
                   <aside className="flex h-full w-[260px] flex-col">
                     <div className="flex flex-1 flex-col overflow-hidden">
-                      <nav className="flex-1 space-y-4 overflow-y-auto px-2 py-3">
+                      <nav className="defilement-barre-laterale flex-1 space-y-4 overflow-y-auto px-2 py-3">
                         {menu.map((el) => {
                           const actif = ongletActif === el.id;
                           return (
@@ -308,6 +324,33 @@ export function BarreLaterale({
                         ))}
                       </nav>
                       <div className="border-t border-white/10 p-3">
+                        <div className="mb-3 flex items-center gap-3 rounded-xl bg-white/5 p-2">
+                          <ImageProfilUtilisateur
+                            photoUrl={utilisateur.photoUrl}
+                            role={utilisateur.role}
+                            prenom={utilisateur.prenom}
+                            nom={utilisateur.nom}
+                            taille="md"
+                            className="ring-2 ring-white/10"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold">
+                              {utilisateur.prenom} {utilisateur.nom}
+                            </p>
+                            <Pastille
+                              ton={
+                                utilisateur.role === "rh"
+                                  ? "accent"
+                                  : utilisateur.role === "manager"
+                                    ? "alerte"
+                                    : "neutre"
+                              }
+                              className="mt-1 text-[9px]"
+                            >
+                              {libelleRole(utilisateur.role)}
+                            </Pastille>
+                          </div>
+                        </div>
                         <Bouton
                           variante="secondaire"
                           className="w-full border-white/15 bg-white/5 text-white"
@@ -327,11 +370,44 @@ export function BarreLaterale({
       </AnimatePresence>
 
       <Dialogue open={confirmerSortie} onOpenChange={setConfirmerSortie}>
-        <ContenuDialogue>
+        <ContenuDialogue className="max-w-md">
           <EnteteDialogue>
-            <TitreDialogue>Quitter la session ?</TitreDialogue>
+            <div className="flex items-center gap-3">
+              <div className="flex size-12 items-center justify-center rounded-full bg-red-500/15">
+                <LogOut className="size-6 text-red-500" />
+              </div>
+              <div>
+                <TitreDialogue>Confirmer la deconnexion</TitreDialogue>
+                <p className="mt-1 text-sm text-[var(--texte-secondaire)]">
+                  Vous allez quitter votre session
+                </p>
+              </div>
+            </div>
           </EnteteDialogue>
-          <div className="flex justify-end gap-2">
+          
+          <div className="my-4 rounded-xl bg-[var(--surface-mute)] p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-full bg-[var(--accent-principal)]/15">
+                <span className="text-sm font-semibold text-[var(--accent-principal)]">
+                  {utilisateur?.prenom?.[0]}{utilisateur?.nom?.[0]}
+                </span>
+              </div>
+              <div>
+                <p className="font-medium text-[var(--texte-principal)]">
+                  {utilisateur?.prenom} {utilisateur?.nom}
+                </p>
+                <p className="text-sm text-[var(--texte-secondaire)]">
+                  {utilisateur?.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-sm text-[var(--texte-secondaire)]">
+            Etes-vous sur de vouloir vous deconnecter ? Vous devrez vous reconnecter pour acceder a votre espace.
+          </p>
+
+          <div className="mt-6 flex items-center justify-end gap-3">
             <Bouton variante="secondaire" onClick={() => setConfirmerSortie(false)}>
               Annuler
             </Bouton>
@@ -343,7 +419,8 @@ export function BarreLaterale({
                 router.replace("/login");
               }}
             >
-              Déconnexion
+              <LogOut className="size-4" />
+              Se deconnecter
             </Bouton>
           </div>
         </ContenuDialogue>

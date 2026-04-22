@@ -6,6 +6,7 @@ import {
   endOfMonth,
   endOfWeek,
   format,
+  isSameDay,
   isToday,
   isSameMonth,
   isWithinInterval,
@@ -20,8 +21,22 @@ import { useMemo, useState } from "react";
 import { Bouton } from "@/components/ui/button";
 import type { DemandeConge } from "@/types";
 import { libelleStatutConge } from "@/components/conges/libelles-conges";
+import { cn } from "@/lib/utils";
 
-export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
+export function CalendrierConges({
+  demandes,
+  compact = false,
+  className,
+  jourSelectionne = null,
+  onSelectionnerJour,
+}: {
+  demandes: DemandeConge[];
+  compact?: boolean;
+  className?: string;
+  /** Jour utilisé comme filtre sur la liste (même jour = désactive le filtre). */
+  jourSelectionne?: Date | null;
+  onSelectionnerJour?: (jour: Date | null) => void;
+}) {
   const [moisCourant, setMoisCourant] = useState(() => startOfMonth(new Date()));
 
   const grille = useMemo(() => {
@@ -33,8 +48,13 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
   const allerAujourdhui = () => setMoisCourant(startOfMonth(new Date()));
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[var(--bordure)]/60 bg-[var(--surface-elevee)] shadow-xl">
-      <div className="border-b border-[var(--bordure)]/60 bg-gradient-to-r from-[var(--accent-principal)]/5 via-transparent to-[var(--accent-principal)]/5 px-5 py-4">
+    <div
+      className={cn(
+        "relative flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--bordure)]/60 bg-[var(--surface-elevee)] shadow-xl",
+        className,
+      )}
+    >
+      <div className="shrink-0 border-b border-[var(--bordure)]/60 bg-gradient-to-r from-[var(--accent-principal)]/5 via-transparent to-[var(--accent-principal)]/5 px-5 py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15">
@@ -44,7 +64,9 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
               <h3 className="text-lg font-bold capitalize tracking-tight">
                 {format(moisCourant, "MMMM yyyy", { locale: fr })}
               </h3>
-              <p className="text-xs text-[var(--texte-secondaire)]">Calendrier des conges</p>
+              <p className="text-xs text-[var(--texte-secondaire)]">
+                {onSelectionnerJour ? "Cliquez un jour pour filtrer la liste" : "Calendrier des conges"}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -80,8 +102,8 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
         </div>
       </div>
 
-      <div className="p-4">
-        <div className="mb-2 grid grid-cols-7 gap-1">
+      <div className="flex min-h-0 flex-1 flex-col p-4">
+        <div className="mb-2 grid shrink-0 grid-cols-7 gap-1">
           {["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((j) => (
             <div
               key={j}
@@ -92,10 +114,20 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
           ))}
         </div>
 
-        <motion.div layout className="grid grid-cols-7 gap-1">
+        <motion.div
+          layout
+          className={cn(
+            "grid min-h-0 grid-cols-7 gap-1",
+            compact
+              ? "max-h-full flex-1 content-start overflow-y-auto auto-rows-[minmax(52px,auto)]"
+              : "flex-1 [grid-auto-rows:minmax(3.25rem,1fr)]",
+          )}
+        >
           {grille.map((jour) => {
             const dansMois = isSameMonth(jour, moisCourant);
             const estAujourdhui = isToday(jour);
+            const estSelectionne =
+              jourSelectionne != null && isSameDay(jourSelectionne, jour);
             const chevauche = demandes.filter((d) => {
               try {
                 return isWithinInterval(jour, {
@@ -107,17 +139,49 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
               }
             });
 
+            const gererClicJour = () => {
+              if (!onSelectionnerJour) return;
+              if (jourSelectionne != null && isSameDay(jourSelectionne, jour)) {
+                onSelectionnerJour(null);
+              } else {
+                onSelectionnerJour(jour);
+              }
+            };
+
             return (
               <motion.div
                 layout
                 key={jour.toISOString()}
                 transition={{ duration: 0.15 }}
-                className={`group relative flex min-h-[72px] flex-col rounded-xl border p-2 transition-all ${
-                  dansMois
-                    ? estAujourdhui
-                      ? "border-[var(--accent-principal)]/50 bg-[var(--accent-principal)]/10 shadow-sm"
-                      : "border-[var(--bordure)]/40 bg-[var(--surface-racine)]/50 hover:border-[var(--bordure)] hover:bg-[var(--surface-mute)]/30"
-                    : "border-transparent bg-transparent"
+                role={onSelectionnerJour ? "button" : undefined}
+                tabIndex={onSelectionnerJour ? 0 : undefined}
+                onClick={onSelectionnerJour ? gererClicJour : undefined}
+                onKeyDown={
+                  onSelectionnerJour
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          gererClicJour();
+                        }
+                      }
+                    : undefined
+                }
+                aria-pressed={onSelectionnerJour ? estSelectionne : undefined}
+                aria-label={
+                  onSelectionnerJour
+                    ? `${format(jour, "d MMMM yyyy", { locale: fr })}${chevauche.length ? `, ${chevauche.length} demande(s)` : ""}`
+                    : undefined
+                }
+                className={`group relative flex ${compact ? "min-h-[52px]" : "min-h-[72px]"} flex-col rounded-xl border p-2 transition-all ${
+                  onSelectionnerJour ? "cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-principal)]/40" : ""
+                } ${
+                  estSelectionne
+                    ? "border-[var(--accent-principal)] bg-[var(--accent-principal)]/20 shadow-md ring-2 ring-[var(--accent-principal)]/30"
+                    : dansMois
+                      ? estAujourdhui
+                        ? "border-[var(--accent-principal)]/50 bg-[var(--accent-principal)]/10 shadow-sm"
+                        : "border-[var(--bordure)]/40 bg-[var(--surface-racine)]/50 hover:border-[var(--bordure)] hover:bg-[var(--surface-mute)]/30"
+                      : "border-transparent bg-transparent opacity-70 hover:bg-[var(--surface-mute)]/20"
                 }`}
               >
                 <span
@@ -135,7 +199,7 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
                   <span className="absolute right-2 top-2 size-1.5 rounded-full bg-[var(--accent-principal)]" />
                 )}
                 <div className="mt-auto flex flex-col gap-0.5">
-                  {chevauche.slice(0, 2).map((d) => (
+                  {chevauche.slice(0, compact ? 1 : 2).map((d) => (
                     <div
                       key={d.id}
                       title={`${libelleStatutConge(d.statut)} - ${d.motif ?? ""}`}
@@ -147,12 +211,12 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
                             : "bg-[var(--accent-principal)]/20 text-[var(--texte-principal)]"
                       }`}
                     >
-                      {d.type.slice(0, 4)}
+                      {compact ? "" : d.type.slice(0, 4)}
                     </div>
                   ))}
-                  {chevauche.length > 2 && (
+                  {chevauche.length > (compact ? 1 : 2) && (
                     <span className="text-[10px] font-medium text-[var(--texte-secondaire)]">
-                      +{chevauche.length - 2}
+                      +{chevauche.length - (compact ? 1 : 2)}
                     </span>
                   )}
                 </div>
@@ -162,7 +226,7 @@ export function CalendrierConges({ demandes }: { demandes: DemandeConge[] }) {
         </motion.div>
       </div>
 
-      <div className="border-t border-[var(--bordure)]/60 bg-[var(--surface-mute)]/30 px-5 py-3">
+      <div className="mt-auto shrink-0 border-t border-[var(--bordure)]/60 bg-[var(--surface-mute)]/30 px-5 py-3">
         <div className="flex flex-wrap items-center gap-4 text-xs">
           <span className="flex items-center gap-2">
             <span className="size-3 rounded-md bg-[var(--accent-principal)]/30" />

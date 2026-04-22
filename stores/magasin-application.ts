@@ -71,6 +71,10 @@ export const magasinApplication = create<MagasinApplication>()(
           set({ ongletActif: "mes-documents" });
           return;
         }
+        if (page === "formulaire-absence") {
+          set({ ongletActif: "absences" });
+          return;
+        }
         if (page && estOngletValide(page)) {
           set({ ongletActif: page });
           return;
@@ -89,6 +93,7 @@ export const magasinApplication = create<MagasinApplication>()(
         menuOuvert: etat.menuOuvert,
         ongletActif: etat.ongletActif,
       }),
+      skipHydration: true,
     },
   ),
 );

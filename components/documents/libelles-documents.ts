@@ -5,6 +5,7 @@ export function libelleTypeDocument(t: TypeDocument) {
     attestation_salaire: "Attestation de salaire",
     certificat_travail: "Certificat de travail",
     rib: "RIB / coordonnées bancaires",
+    fiche_paie: "Fiche de paie",
     convention_stage: "Convention de stage",
     autre: "Autre document",
   };

@@ -2,16 +2,12 @@
 
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { 
   Check, 
-  ChevronLeft, 
-  ChevronRight, 
   Clock, 
   FileText, 
   Filter, 
-  LayoutGrid, 
-  LayoutList, 
   MessageSquare, 
   Search, 
   User, 
@@ -33,6 +29,8 @@ import {
   TableauRangee,
 } from "@/components/ui/table";
 import { ZoneTexte } from "@/components/ui/textarea";
+import { Pagination } from "@/components/ui/pagination";
+import { ToggleVue, type ModeVue } from "@/components/ui/toggle-vue";
 import { useDocuments, useMiseAJourDocumentRh } from "@/hooks/queries/use-documents";
 import { useEmployes } from "@/hooks/queries/use-employes";
 import type { DemandeDocument, StatutDemandeDocument, TypeDocument } from "@/types";
@@ -42,7 +40,7 @@ const ITEMS_PAR_PAGE = 6;
 function pastilleStatut(statut: StatutDemandeDocument): NonNullable<PastilleProps["ton"]> {
   if (statut === "pret") return "succes";
   if (statut === "refuse") return "danger";
-  if (statut === "en_traitement") return "info";
+  if (statut === "en_traitement") return "accent";
   return "alerte";
 }
 
@@ -69,7 +67,7 @@ export function PageDocumentsRh() {
   const [filtreStatut, setFiltreStatut] = useState<StatutDemandeDocument | "tous">("tous");
   const [filtreType, setFiltreType] = useState<TypeDocument | "tous">("tous");
   const [pageCourante, setPageCourante] = useState(1);
-  const [vueMode, setVueMode] = useState<"tableau" | "grille">("grille");
+  const [modeVue, setModeVue] = useState<ModeVue>("tableau");
 
   const noms = useMemo(() => {
     const m = new Map<string, { nom: string; poste?: string }>();
@@ -94,11 +92,14 @@ export function PageDocumentsRh() {
   }, [documents, recherche, filtreStatut, filtreType, noms]);
 
   // Pagination
-  const totalPages = Math.ceil(documentsFiltres.length / ITEMS_PAR_PAGE);
   const documentsPagines = useMemo(() => {
     const debut = (pageCourante - 1) * ITEMS_PAR_PAGE;
     return documentsFiltres.slice(debut, debut + ITEMS_PAR_PAGE);
   }, [documentsFiltres, pageCourante]);
+
+  useEffect(() => {
+    setPageCourante(1);
+  }, [recherche, filtreStatut, filtreType]);
 
   const ouvrirModal = (demande: DemandeDocument, action: "pret" | "refuser" | "traiter") => {
     setDemandeSelectionnee(demande);
@@ -214,7 +215,7 @@ export function PageDocumentsRh() {
               <Bouton 
                 onClick={() => void confirmerAction()}
                 disabled={mutation.isPending}
-                variante={actionModal === "refuser" ? "danger" : "defaut"}
+                variante={actionModal === "refuser" ? "destructif" : "defaut"}
               >
                 {mutation.isPending ? "En cours..." : (
                   actionModal === "pret" ? "Marquer pret" :
@@ -237,24 +238,7 @@ export function PageDocumentsRh() {
                 {filtreStatut === "en_attente" && " en attente de traitement"}
               </CarteDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <Bouton
-                taille="icone"
-                variante={vueMode === "tableau" ? "defaut" : "fantome"}
-                onClick={() => setVueMode("tableau")}
-                aria-label="Vue tableau"
-              >
-                <LayoutList className="size-4" />
-              </Bouton>
-              <Bouton
-                taille="icone"
-                variante={vueMode === "grille" ? "defaut" : "fantome"}
-                onClick={() => setVueMode("grille")}
-                aria-label="Vue grille"
-              >
-                <LayoutGrid className="size-4" />
-              </Bouton>
-            </div>
+            <ToggleVue mode={modeVue} onChangerMode={setModeVue} />
           </div>
         </CarteEntete>
         <CarteContenu className="space-y-4">
@@ -311,7 +295,7 @@ export function PageDocumentsRh() {
               <Squelette className="h-24 w-full rounded-xl" />
               <Squelette className="h-24 w-full rounded-xl" />
             </div>
-          ) : vueMode === "grille" ? (
+          ) : modeVue === "grille" ? (
             /* Vue Grille */
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {documentsPagines.length === 0 ? (
@@ -379,7 +363,7 @@ export function PageDocumentsRh() {
                             </Bouton>
                             <Bouton
                               taille="sm"
-                              variante="danger"
+                              variante="destructif"
                               className="flex-1"
                               onClick={() => ouvrirModal(d, "refuser")}
                             >
@@ -463,7 +447,7 @@ export function PageDocumentsRh() {
                                 </Bouton>
                                 <Bouton
                                   taille="sm"
-                                  variante="danger"
+                                  variante="destructif"
                                   onClick={() => ouvrirModal(d, "refuser")}
                                 >
                                   <X className="size-3" />
@@ -491,51 +475,15 @@ export function PageDocumentsRh() {
           )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-[var(--bordure)] pt-4">
-              <p className="text-sm text-[var(--texte-secondaire)]">
-                Page {pageCourante} sur {totalPages}
-              </p>
-              <div className="flex items-center gap-1">
-                <Bouton
-                  taille="icone"
-                  variante="fantome"
-                  onClick={() => setPageCourante((p) => Math.max(1, p - 1))}
-                  disabled={pageCourante === 1}
-                >
-                  <ChevronLeft className="size-4" />
-                </Bouton>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let page: number;
-                  if (totalPages <= 5) {
-                    page = i + 1;
-                  } else if (pageCourante <= 3) {
-                    page = i + 1;
-                  } else if (pageCourante >= totalPages - 2) {
-                    page = totalPages - 4 + i;
-                  } else {
-                    page = pageCourante - 2 + i;
-                  }
-                  return (
-                    <Bouton
-                      key={page}
-                      taille="icone"
-                      variante={page === pageCourante ? "defaut" : "fantome"}
-                      onClick={() => setPageCourante(page)}
-                    >
-                      {page}
-                    </Bouton>
-                  );
-                })}
-                <Bouton
-                  taille="icone"
-                  variante="fantome"
-                  onClick={() => setPageCourante((p) => Math.min(totalPages, p + 1))}
-                  disabled={pageCourante === totalPages}
-                >
-                  <ChevronRight className="size-4" />
-                </Bouton>
-              </div>
+          {documentsFiltres.length > 0 && (
+            <div className="border-t border-[var(--bordure)]/50 pt-4">
+              <Pagination
+                pageActuelle={pageCourante}
+                totalPages={Math.max(1, Math.ceil(documentsFiltres.length / ITEMS_PAR_PAGE))}
+                onChangerPage={setPageCourante}
+                nombreElementsTotal={documentsFiltres.length}
+                taillePage={ITEMS_PAR_PAGE}
+              />
             </div>
           )}
         </CarteContenu>

@@ -17,7 +17,7 @@ const policeMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "MUFER Employés",
-  description: "Gestion RH : congés, documents et pilotage.",
+  description: "Gestion RH : congés et documents.",
 };
 
 export const viewport: Viewport = {
@@ -31,7 +31,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${policeSans.variable} ${policeMono.variable}`} suppressHydrationWarning>
-      <body className="min-h-full bg-[var(--surface-racine)] font-sans antialiased">
+      <body
+        className="min-h-full bg-[var(--surface-racine)] font-sans antialiased"
+        suppressHydrationWarning
+      >
         <FournisseursApplication>{children}</FournisseursApplication>
       </body>
     </html>
