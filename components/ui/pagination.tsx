@@ -78,9 +78,11 @@ export function Pagination({
       )}
     >
       {texteDecompte ? (
-        <p className="text-sm text-[var(--texte-secondaire)] sm:order-first">{texteDecompte}</p>
+        <p className="text-center text-xs text-[var(--texte-secondaire)] sm:order-first sm:text-left sm:text-sm">
+          {texteDecompte}
+        </p>
       ) : null}
-      <div className="flex items-center justify-center gap-1 sm:justify-end">
+      <div className="flex min-w-0 flex-wrap items-center justify-center gap-0.5 sm:justify-end sm:gap-1">
       <Bouton
         variante="fantome"
         taille="icone"

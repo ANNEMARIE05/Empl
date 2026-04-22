@@ -7,6 +7,7 @@ import { Bell, BellOff } from "lucide-react";
 import { Bouton } from "@/components/ui/button";
 import { Carte, CarteContenu, CarteEntete, CarteTitre, CarteDescription } from "@/components/ui/card";
 import { Pastille } from "@/components/ui/badge";
+import { EntetePage } from "@/components/ui/entete-page";
 import { FiltreSelect } from "@/components/ui/filtre-select";
 import { BarreRecherche } from "@/components/ui/barre-recherche";
 import { useMarquerNotificationLue, useNotifications } from "@/hooks/queries/use-notifications";
@@ -41,19 +42,15 @@ export function VueNotifications() {
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
-          <Bell className="size-6 text-[var(--accent-principal)]" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">Centre de notifications</h2>
-          <p className="text-sm text-[var(--texte-secondaire)]">
-            {nombreNonLues > 0
-              ? `${nombreNonLues} notification${nombreNonLues > 1 ? "s" : ""} non lue${nombreNonLues > 1 ? "s" : ""}`
-              : "Toutes les notifications sont lues"}
-          </p>
-        </div>
-      </div>
+      <EntetePage
+        icone={<Bell className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre="Centre de notifications"
+        description={
+          nombreNonLues > 0
+            ? `${nombreNonLues} notification${nombreNonLues > 1 ? "s" : ""} non lue${nombreNonLues > 1 ? "s" : ""}`
+            : "Toutes les notifications sont lues"
+        }
+      />
 
       <Carte>
         <CarteEntete>

@@ -8,6 +8,7 @@ import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libelles-conges";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { EntetePage } from "@/components/ui/entete-page";
 import { Pastille, type PastilleProps } from "@/components/ui/badge";
 import { Squelette } from "@/components/ui/skeleton";
 import { Bouton } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import {
 import {
   Dialogue,
   ContenuDialogue,
+  PiedDialogue,
   DeclencheurDialogue,
   EnteteDialogue,
   TitreDialogue,
@@ -180,14 +182,14 @@ function FormulaireEmploye({ employe, onSoumettre, onAnnuler, isLoading }: Formu
           />
         </div>
       </div>
-      <div className="flex justify-end gap-3 pt-4">
-        <Bouton type="button" variante="secondaire" onClick={onAnnuler}>
+      <PiedDialogue className="pt-4">
+        <Bouton type="button" variante="secondaire" className="w-full sm:w-auto" onClick={onAnnuler}>
           Annuler
         </Bouton>
-        <Bouton type="submit" disabled={isLoading}>
+        <Bouton type="submit" className="w-full sm:w-auto" disabled={isLoading}>
           {isLoading ? "Enregistrement..." : employe ? "Modifier" : "Creer"}
         </Bouton>
-      </div>
+      </PiedDialogue>
     </form>
   );
 }
@@ -438,23 +440,21 @@ export function ListeEmployes() {
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
-            <Users className="size-6 text-[var(--accent-principal)]" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold tracking-tight">Annuaire des employes</h2>
-            <p className="text-sm text-[var(--texte-secondaire)]">
-              {donneesFiltrees.length} membre{donneesFiltrees.length > 1 ? "s" : ""} dans l&apos;organisation
-            </p>
-          </div>
-        </div>
-        <Bouton onClick={ouvrirCreer}>
-          <Plus className="size-4 mr-2" />
-          Nouvel employe
-        </Bouton>
-      </div>
+      <EntetePage
+        icone={<Users className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre="Annuaire des employes"
+        description={
+          <>
+            {donneesFiltrees.length} membre{donneesFiltrees.length > 1 ? "s" : ""} dans l&apos;organisation
+          </>
+        }
+        actions={
+          <Bouton className="w-full gap-2 sm:w-auto" onClick={ouvrirCreer}>
+            <Plus className="size-4" />
+            Nouvel employe
+          </Bouton>
+        }
+      />
 
       <Carte>
         <CarteEntete>
@@ -687,18 +687,19 @@ export function ListeEmployes() {
                 </span>{" "}
                 ? Cette action est irreversible.
               </p>
-              <div className="flex justify-end gap-3">
-                <Bouton variante="secondaire" onClick={() => setDialogueOuvert(false)}>
+              <PiedDialogue>
+                <Bouton variante="secondaire" className="w-full sm:w-auto" onClick={() => setDialogueOuvert(false)}>
                   Annuler
                 </Bouton>
                 <Bouton
+                  className="w-full sm:w-auto"
                   variante="destructif"
                   onClick={handleSupprimer}
                   disabled={supprimer.isPending}
                 >
                   {supprimer.isPending ? "Suppression..." : "Supprimer"}
                 </Bouton>
-              </div>
+              </PiedDialogue>
             </div>
           )}
         </ContenuDialogue>

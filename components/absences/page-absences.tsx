@@ -11,6 +11,7 @@ import { Bouton } from "@/components/ui/button";
 import {
   Dialogue,
   ContenuDialogue,
+  PiedDialogue,
   EnteteDialogue,
   TitreDialogue,
 } from "@/components/ui/dialog";
@@ -29,6 +30,7 @@ import { BarreRecherche } from "@/components/ui/barre-recherche";
 import { FiltreSelect } from "@/components/ui/filtre-select";
 import { Pagination } from "@/components/ui/pagination";
 import { NombreAnime } from "@/components/metrique/nombre-anime";
+import { EntetePage } from "@/components/ui/entete-page";
 import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
 import { magasinApplication } from "@/stores/magasin-application";
 import { cn } from "@/lib/utils";
@@ -170,29 +172,23 @@ export function PageAbsences({ impulsionFormulaire = 0 }: { impulsionFormulaire?
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2.5 sm:gap-4">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-principal)]/15 sm:size-12 sm:rounded-2xl">
-            <CalendarOff className="size-5 text-[var(--accent-principal)] sm:size-6" />
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-base font-bold tracking-tight sm:text-xl">
-              {vueTouteEntreprise ? "Absences" : "Mes absences"}
-            </h2>
-            <p className="text-xs text-[var(--texte-secondaire)] sm:text-sm">
-              {vueTouteEntreprise
-                ? "Traitement des indisponibilites declarees par les collaborateurs"
-                : "Historique de vos indisponibilites"}
-            </p>
-          </div>
-        </div>
-        {!vueTouteEntreprise && (
-          <Bouton onClick={() => setDialogueOuvert(true)}>
-            <Plus className="size-4" />
-            Nouvelle demande
-          </Bouton>
-        )}
-      </div>
+      <EntetePage
+        icone={<CalendarOff className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre={vueTouteEntreprise ? "Absences" : "Mes absences"}
+        description={
+          vueTouteEntreprise
+            ? "Traitement des indisponibilites declarees par les collaborateurs"
+            : "Historique de vos indisponibilites"
+        }
+        actions={
+          !vueTouteEntreprise ? (
+            <Bouton className="w-full gap-2 sm:w-auto" onClick={() => setDialogueOuvert(true)}>
+              <Plus className="size-4" />
+              Nouvelle demande
+            </Bouton>
+          ) : undefined
+        }
+      />
 
       {/* Stats cards : 2×2 sur mobile, 2 colonnes sm–md, 4 colonnes large */}
       <GrilleStatsKpi colonnes={4}>
@@ -473,18 +469,19 @@ export function PageAbsences({ impulsionFormulaire = 0 }: { impulsionFormulaire?
                   <Entree type="date" value={dateAu} onChange={(e) => setDateAu(e.target.value)} />
                 </div>
               </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <Bouton variante="secondaire" type="button" onClick={() => setDialogueOuvert(false)}>
+              <PiedDialogue className="pt-2">
+                <Bouton variante="secondaire" type="button" className="w-full sm:w-auto" onClick={() => setDialogueOuvert(false)}>
                   Annuler
                 </Bouton>
                 <Bouton
                   type="button"
+                  className="w-full sm:w-auto"
                   disabled={envoiEnCours || !dateDu || !texteMotif.trim()}
                   onClick={() => void soumettreDemande()}
                 >
                   {envoiEnCours ? "Envoi..." : "Envoyer la demande"}
                 </Bouton>
-              </div>
+              </PiedDialogue>
             </div>
           </ContenuDialogue>
         </Dialogue>

@@ -7,10 +7,12 @@ import { FileText, Plus, Search, X } from "lucide-react";
 import { libelleStatutDocument, libelleTypeDocument } from "@/components/documents/libelles-documents";
 import { Bouton } from "@/components/ui/button";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { EntetePage } from "@/components/ui/entete-page";
 import {
   Dialogue,
   ContenuDialogue,
   EnteteDialogue,
+  PiedDialogue,
   TitreDialogue,
 } from "@/components/ui/dialog";
 import { Etiquette } from "@/components/ui/label";
@@ -129,23 +131,22 @@ export function VueMesDocuments({ impulsionFormulaire = 0 }: { impulsionFormulai
   return (
     <div className="space-y-3 sm:space-y-6">
       {/* Header with action button */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-500/15">
-            <FileText className="size-6 text-emerald-600" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold tracking-tight">Mes documents</h2>
-            <p className="text-sm text-[var(--texte-secondaire)]">
-              {donneesFiltrees.length} demande{donneesFiltrees.length > 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-        <Bouton onClick={() => setOuvert(true)}>
-          <Plus className="size-4" />
-          Nouvelle demande
-        </Bouton>
-      </div>
+      <EntetePage
+        classNameZoneIcone="bg-emerald-500/15"
+        icone={<FileText className="size-5 sm:size-6 text-emerald-600" />}
+        titre="Mes documents"
+        description={
+          <>
+            {donneesFiltrees.length} demande{donneesFiltrees.length > 1 ? "s" : ""}
+          </>
+        }
+        actions={
+          <Bouton className="w-full gap-2 sm:w-auto" onClick={() => setOuvert(true)}>
+            <Plus className="size-4" />
+            Nouvelle demande
+          </Bouton>
+        }
+      />
 
       <Carte>
         <CarteEntete>
@@ -297,14 +298,19 @@ export function VueMesDocuments({ impulsionFormulaire = 0 }: { impulsionFormulai
                 placeholder="Informations complementaires pour votre demande..."
               />
             </div>
-            <div className="flex justify-end gap-3 pt-2">
-              <Bouton variante="secondaire" type="button" onClick={() => setOuvert(false)}>
+            <PiedDialogue className="pt-2">
+              <Bouton variante="secondaire" type="button" className="w-full sm:w-auto" onClick={() => setOuvert(false)}>
                 Annuler
               </Bouton>
-              <Bouton type="button" disabled={creation.isPending} onClick={() => void envoyer()}>
+              <Bouton
+                type="button"
+                className="w-full sm:w-auto"
+                disabled={creation.isPending}
+                onClick={() => void envoyer()}
+              >
                 {creation.isPending ? "Envoi..." : "Envoyer la demande"}
               </Bouton>
-            </div>
+            </PiedDialogue>
           </div>
         </ContenuDialogue>
       </Dialogue>

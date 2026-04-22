@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Bouton } from "@/components/ui/button";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { EntetePage } from "@/components/ui/entete-page";
 import { Etiquette } from "@/components/ui/label";
 import { Pastille } from "@/components/ui/badge";
 
@@ -1228,21 +1229,12 @@ export function VueParametrage() {
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      <Carte>
-        <CarteEntete>
-          <div className="flex items-center gap-3">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-[var(--accent-principal)]/10">
-              <Settings className="size-6 text-[var(--accent-principal)]" />
-            </div>
-            <div>
-              <CarteTitre>Parametrage</CarteTitre>
-              <CarteDescription>
-                Configurez les parametres metier de l&apos;application MUFER Gestion-Employes
-              </CarteDescription>
-            </div>
-          </div>
-        </CarteEntete>
-      </Carte>
+      <EntetePage
+        classNameZoneIcone="bg-[var(--accent-principal)]/10"
+        icone={<Settings className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre="Parametrage"
+        description="Configurez les parametres metier de l&apos;application MUFER Gestion-Employes"
+      />
 
       <div className="grid gap-2 sm:gap-4 lg:gap-6 lg:grid-cols-[280px_1fr]">
         {/* Navigation laterale */}

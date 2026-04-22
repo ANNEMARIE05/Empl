@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
 import { Bouton } from "@/components/ui/button";
+import { EntetePage } from "@/components/ui/entete-page";
 import { Entree } from "@/components/ui/input";
 import { Etiquette } from "@/components/ui/label";
 import {
@@ -91,17 +92,11 @@ export function VueParametres() {
   return (
     <div className="space-y-3 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
-          <Settings className="size-6 text-[var(--accent-principal)]" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">Parametres</h2>
-          <p className="text-sm text-[var(--texte-secondaire)]">
-            Gerez vos informations et votre securite
-          </p>
-        </div>
-      </div>
+      <EntetePage
+        icone={<Settings className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre="Parametres"
+        description="Gerez vos informations et votre securite"
+      />
 
       {/* Navigation par onglets */}
       <div className="flex flex-wrap gap-2 rounded-xl border border-[var(--bordure)] bg-[var(--surface-elevee)] p-1.5">

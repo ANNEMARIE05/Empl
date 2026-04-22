@@ -23,6 +23,7 @@ import { CalendrierConges } from "@/components/conges/calendrier-conges";
 import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libelles-conges";
 import { Bouton } from "@/components/ui/button";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { EntetePage } from "@/components/ui/entete-page";
 import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
 import { Etiquette } from "@/components/ui/label";
 import { Pastille, type PastilleProps } from "@/components/ui/badge";
@@ -37,7 +38,7 @@ import {
 } from "@/components/ui/table";
 import { ZoneTexte } from "@/components/ui/textarea";
 import { ToggleVue, type ModeVue } from "@/components/ui/toggle-vue";
-import { ContenuDialogue, Dialogue, EnteteDialogue, TitreDialogue } from "@/components/ui/dialog";
+import { ContenuDialogue, Dialogue, EnteteDialogue, PiedDialogue, TitreDialogue } from "@/components/ui/dialog";
 import { useConges, useMiseAJourCongeRh } from "@/hooks/queries/use-conges";
 import { useEmployes } from "@/hooks/queries/use-employes";
 import type { DemandeConge, StatutDemandeConge, TypeConge } from "@/types";
@@ -207,6 +208,16 @@ export function PageGestionCongesRh() {
 
   return (
     <div className="space-y-3 sm:space-y-6">
+      <EntetePage
+        icone={<Calendar className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre="Gestion des conges"
+        description={
+          <>
+            {congesFiltres.length} demande{congesFiltres.length > 1 ? "s" : ""} apres filtrage
+            {filtreStatut === "en_attente" && " (en attente de traitement)"}
+          </>
+        }
+      />
       <div className="flex flex-col gap-2 sm:gap-4 xl:gap-6 xl:flex-row xl:items-stretch">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 sm:gap-4">
           <GrilleStatsKpi colonnes={3} className="shrink-0">
@@ -332,7 +343,7 @@ export function PageGestionCongesRh() {
         }}
       >
         {demandeSelectionnee && (
-          <ContenuDialogue className="max-h-[85vh] max-w-lg overflow-y-auto">
+          <ContenuDialogue className="max-w-lg sm:max-w-2xl">
             <EnteteDialogue>
               <TitreDialogue>
                 {actionModal === "valider" && "Valider la demande"}
@@ -383,11 +394,12 @@ export function PageGestionCongesRh() {
                   placeholder="Ce commentaire sera visible par l'employe..."
                 />
               </div>
-              <div className="flex justify-end gap-3 border-t border-[var(--bordure)] pt-4">
-                <Bouton type="button" variante="secondaire" onClick={fermerModal}>
+              <PiedDialogue className="border-t border-[var(--bordure)] pt-4">
+                <Bouton type="button" variante="secondaire" className="w-full sm:w-auto" onClick={fermerModal}>
                   Annuler
                 </Bouton>
                 <Bouton
+                  className="w-full sm:w-auto"
                   type="button"
                   onClick={() => void confirmerAction()}
                   disabled={mutation.isPending}
@@ -401,7 +413,7 @@ export function PageGestionCongesRh() {
                         ? "Refuser"
                         : "Enregistrer"}
                 </Bouton>
-              </div>
+              </PiedDialogue>
             </div>
           </ContenuDialogue>
         )}

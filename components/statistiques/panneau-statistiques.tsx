@@ -1,7 +1,9 @@
 "use client";
 
+import { BarChart3 } from "lucide-react";
 import { NombreAnime } from "@/components/metrique/nombre-anime";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
+import { EntetePage } from "@/components/ui/entete-page";
 import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
 import { Squelette } from "@/components/ui/skeleton";
 import { useStatistiques } from "@/hooks/queries/use-statistiques";
@@ -53,6 +55,11 @@ export function PanneauStatistiques() {
 
   return (
     <div className="space-y-3 sm:space-y-6">
+      <EntetePage
+        icone={<BarChart3 className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre="Statistiques"
+        description="Indicateurs de charge, delais de traitement et volume documentaire"
+      />
       <GrilleStatsKpi colonnes={4}>
         <Carte className="min-w-0">
           <CarteEntete>

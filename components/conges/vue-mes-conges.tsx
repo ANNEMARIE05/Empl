@@ -9,9 +9,11 @@ import { libelleStatutConge, libelleTypeConge } from "@/components/conges/libell
 import { Bouton } from "@/components/ui/button";
 import { Carte, CarteContenu, CarteDescription, CarteEntete, CarteTitre } from "@/components/ui/card";
 import { GrilleStatsKpi } from "@/components/ui/grille-stats-kpi";
+import { EntetePage } from "@/components/ui/entete-page";
 import {
   Dialogue,
   ContenuDialogue,
+  PiedDialogue,
   EnteteDialogue,
   TitreDialogue,
 } from "@/components/ui/dialog";
@@ -156,23 +158,21 @@ export function VueMesConges({ impulsionFormulaire = 0 }: { impulsionFormulaire?
   return (
     <div className="space-y-3 sm:space-y-6">
       {/* Header with action button */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
-            <CalendarDays className="size-6 text-[var(--accent-principal)]" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold tracking-tight">Mes conges</h2>
-            <p className="text-sm text-[var(--texte-secondaire)]">
-              {donneesFiltrees.length} demande{donneesFiltrees.length > 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-        <Bouton onClick={() => setOuvert(true)}>
-          <Plus className="size-4" />
-          Nouvelle demande
-        </Bouton>
-      </div>
+      <EntetePage
+        icone={<CalendarDays className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre="Mes conges"
+        description={
+          <>
+            {donneesFiltrees.length} demande{donneesFiltrees.length > 1 ? "s" : ""}
+          </>
+        }
+        actions={
+          <Bouton className="w-full gap-2 sm:w-auto" onClick={() => setOuvert(true)}>
+            <Plus className="size-4" />
+            Nouvelle demande
+          </Bouton>
+        }
+      />
 
       <div className="flex min-h-0 flex-col gap-4">
         <GrilleStatsKpi colonnes={3} className="shrink-0">
@@ -257,7 +257,7 @@ export function VueMesConges({ impulsionFormulaire = 0 }: { impulsionFormulaire?
             </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-1">
+            <div className="min-h-0 min-w-0 flex-1 overflow-auto px-3 py-1 sm:px-5">
             {isLoading ? (
               <div className="space-y-2">
                 <Squelette className="h-10 w-full" />
@@ -379,18 +379,19 @@ export function VueMesConges({ impulsionFormulaire = 0 }: { impulsionFormulaire?
                 placeholder="Precision sur votre demande..."
               />
             </div>
-            <div className="flex justify-end gap-3 pt-2">
-              <Bouton variante="secondaire" type="button" onClick={() => setOuvert(false)}>
+            <PiedDialogue className="pt-2">
+              <Bouton variante="secondaire" type="button" className="w-full sm:w-auto" onClick={() => setOuvert(false)}>
                 Annuler
               </Bouton>
-              <Bouton 
-                type="button" 
-                disabled={creation.isPending || !dateDebut || !dateFin} 
+              <Bouton
+                type="button"
+                className="w-full sm:w-auto"
+                disabled={creation.isPending || !dateDebut || !dateFin}
                 onClick={() => void soumettre()}
               >
                 {creation.isPending ? "Envoi..." : "Envoyer la demande"}
               </Bouton>
-            </div>
+            </PiedDialogue>
           </div>
         </ContenuDialogue>
       </Dialogue>

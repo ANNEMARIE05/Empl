@@ -29,6 +29,7 @@ import {
   TableauRangee,
 } from "@/components/ui/table";
 import { ZoneTexte } from "@/components/ui/textarea";
+import { EntetePage } from "@/components/ui/entete-page";
 import { Pagination } from "@/components/ui/pagination";
 import { ToggleVue, type ModeVue } from "@/components/ui/toggle-vue";
 import { useDocuments, useMiseAJourDocumentRh } from "@/hooks/queries/use-documents";
@@ -228,17 +229,29 @@ export function PageDocumentsRh() {
         </div>
       )}
 
+      <div className="space-y-3 sm:space-y-6">
+      <EntetePage
+        icone={<FileText className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre="Documents administratifs"
+        description={
+          <>
+            {documentsFiltres.length} demande{documentsFiltres.length > 1 ? "s" : ""}
+            {filtreStatut === "en_attente" && " en attente de traitement"} — suivi des pieces
+          </>
+        }
+      />
       <Carte>
         <CarteEntete>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="min-w-0">
               <CarteTitre>Demandes de documents</CarteTitre>
               <CarteDescription>
-                {documentsFiltres.length} demande{documentsFiltres.length > 1 ? "s" : ""}
-                {filtreStatut === "en_attente" && " en attente de traitement"}
+                Vue tableau ou cartes, filtres et actions RH.
               </CarteDescription>
             </div>
+            <div className="w-full min-w-0 sm:w-auto sm:shrink-0">
             <ToggleVue mode={modeVue} onChangerMode={setModeVue} />
+            </div>
           </div>
         </CarteEntete>
         <CarteContenu className="space-y-4">
@@ -488,6 +501,7 @@ export function PageDocumentsRh() {
           )}
         </CarteContenu>
       </Carte>
+      </div>
     </>
   );
 }

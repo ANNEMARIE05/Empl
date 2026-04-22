@@ -3,8 +3,12 @@ import { cn } from "@/lib/utils";
 
 const Tableau = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-x-auto rounded-xl border border-[var(--bordure)]/50 bg-[var(--surface-elevee)]">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
+    <div className="relative w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-[var(--bordure)]/50 bg-[var(--surface-elevee)] [-webkit-overflow-scrolling:touch] sm:rounded-xl">
+      <table
+        ref={ref}
+        className={cn("w-full min-w-0 caption-bottom text-xs sm:text-sm", className)}
+        {...props}
+      />
     </div>
   ),
 );
@@ -48,7 +52,7 @@ const TableauCelluleEntete = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-11 px-4 text-left align-middle text-xs font-semibold uppercase tracking-wider text-[var(--texte-secondaire)]",
+      "h-9 min-w-[2.5rem] px-2 text-left align-middle text-[10px] font-semibold uppercase tracking-wider text-[var(--texte-secondaire)] sm:h-11 sm:min-w-0 sm:px-4 sm:text-xs",
       className,
     )}
     {...props}
@@ -60,7 +64,14 @@ const TableauCellule = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <td ref={ref} className={cn("px-4 py-3 align-middle text-[var(--texte-principal)]", className)} {...props} />
+  <td
+    ref={ref}
+    className={cn(
+      "px-2 py-2 align-middle text-[var(--texte-principal)] sm:px-4 sm:py-3",
+      className,
+    )}
+    {...props}
+  />
 ));
 TableauCellule.displayName = "TableauCellule";
 

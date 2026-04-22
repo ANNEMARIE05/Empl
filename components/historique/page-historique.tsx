@@ -14,6 +14,7 @@ import {
   TableauRangee,
 } from "@/components/ui/table";
 import { BarreRecherche } from "@/components/ui/barre-recherche";
+import { EntetePage } from "@/components/ui/entete-page";
 import { FiltreSelect } from "@/components/ui/filtre-select";
 import { Pagination } from "@/components/ui/pagination";
 import { Pastille } from "@/components/ui/badge";
@@ -130,28 +131,23 @@ export function PageHistorique() {
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--accent-principal)]/15">
-          <History className="size-6 text-[var(--accent-principal)]" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">Historique</h2>
-          <p className="text-sm text-[var(--texte-secondaire)]">
-            {utilisateur.role !== "rh" ? (
-              <>
-                Congés, documents, absences et notifications vous concernant — {donneesFiltrees.length}{" "}
-                entrée
-                {donneesFiltrees.length > 1 ? "s" : ""}
-              </>
-            ) : (
-              <>
-                Vue consolidée des espaces Congés, Documents, Absences et Notifications —{" "}
-                {donneesFiltrees.length} entrée{donneesFiltrees.length > 1 ? "s" : ""}
-              </>
-            )}
-          </p>
-        </div>
-      </div>
+      <EntetePage
+        icone={<History className="size-5 sm:size-6 text-[var(--accent-principal)]" />}
+        titre="Historique"
+        description={
+          utilisateur.role !== "rh" ? (
+            <>
+              Congés, documents, absences et notifications vous concernant — {donneesFiltrees.length} entrée
+              {donneesFiltrees.length > 1 ? "s" : ""}
+            </>
+          ) : (
+            <>
+              Vue consolidée des espaces Congés, Documents, Absences et Notifications — {donneesFiltrees.length}{" "}
+              entrée{donneesFiltrees.length > 1 ? "s" : ""}
+            </>
+          )
+        }
+      />
 
       <Carte>
         <CarteEntete>
